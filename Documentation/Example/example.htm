@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Publishing Network for Geoscientific &amp; Environmental Data - Search</title>
+<meta name="Generator" content="TopStyle Pro 3.12" />
+<meta name="Author" content="Michael Diepenbroek, Hannes Grobe, Uwe Schindler, Rainer Sieger" />
+<link rel="stylesheet" href="/css/base.css" type="text/css" />
+<link rel="stylesheet" href="/css/resultset.css" type="text/css" />
+<link rel="alternate" title="PANGAEA latest datasets" type="application/rss+xml" href="/tools/latest-datasets.rss" />
+<link rel="alternate" title="PANGAEA latest datasets about &quot;xbt polarstern ant-xi/*&quot;" type="application/rss+xml" href="/tools/latest-datasets.rss?q=xbt+polarstern+ant-xi%2F%2A&amp;minlat=&amp;minlon=&amp;maxlat=&amp;maxlon=&amp;mindate=&amp;maxdate=&amp;env=All" />
+<link rel="search" title="PANGAEA" type="application/opensearchdescription+xml" href="/tools/pvsearch.xml" />
+<script type="text/javascript" src="/shared/js/yui/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="/shared/js/yui/connection/connection-min.js"></script>
+<script type="text/javascript" src="/shared/js/yui/autocomplete/autocomplete-min.js"></script>
+<script type="text/javascript" src="/advanced/search-min.js"></script>
+</head>
+
+<body onload="doInit(true,false,'d207e63e34fb5bc9ad6fc71e5721931a',12);">
+
+<!-- ************************************* Header ********************************************************** -->
+
+<div id="resultsetheader">
+<table summary="Layout">
+<tr><td rowspan="2" class="logo"><a href="/"><img src="/PICS/pangaea_logo_100x70.png" width="100" height="70" alt="PANGAEA logo" /></a></td>
+<td rowspan="2" class="searchcontainer">
+<div id="simplesearch">
+<form action="/search" method="get" name="PangaVistaForm">
+	<input type="hidden" name="count" value="100" />
+	<input type="hidden" name="minlat" value="" />
+	<input type="hidden" name="minlon" value="" />
+	<input type="hidden" name="maxlat" value="" />
+	<input type="hidden" name="maxlon" value="" />
+	<input type="hidden" name="mindate" value="" />
+	<input type="hidden" name="maxdate" value="" />
+	<input type="hidden" name="env" value="All" />
+	<table summary="Query">
+		<tr>
+			<td class="environmentActive">All</td>
+			<td class="environment"><a rel="nofollow" href="/search?count=100&amp;q=xbt+polarstern+ant-xi%2F%2A&amp;minlat=&amp;minlon=&amp;maxlat=&amp;maxlon=&amp;mindate=&amp;maxdate=&amp;env=Water" onclick="setEnvironment('Water');return false;">Water</a></td>
+			<td class="environment"><a rel="nofollow" href="/search?count=100&amp;q=xbt+polarstern+ant-xi%2F%2A&amp;minlat=&amp;minlon=&amp;maxlat=&amp;maxlon=&amp;mindate=&amp;maxdate=&amp;env=Sediment" onclick="setEnvironment('Sediment');return false;">Sediment</a></td>
+			<td class="environment"><a rel="nofollow" href="/search?count=100&amp;q=xbt+polarstern+ant-xi%2F%2A&amp;minlat=&amp;minlon=&amp;maxlat=&amp;maxlon=&amp;mindate=&amp;maxdate=&amp;env=Ice" onclick="setEnvironment('Ice');return false;">Ice</a></td>
+			<td class="environment"><a rel="nofollow" href="/search?count=100&amp;q=xbt+polarstern+ant-xi%2F%2A&amp;minlat=&amp;minlon=&amp;maxlat=&amp;maxlon=&amp;mindate=&amp;maxdate=&amp;env=Atmosphere" onclick="setEnvironment('Atmosphere');return false;">Atmosphere</a></td>
+			<td class="environment">&nbsp;</td>
+		</tr>
+		<tr>
+			<td class="query" colspan="5"><!--BEGIN AUTOCOMPLETE--><input id="queryinput" name="q" value="xbt polarstern ant-xi/*" /><div id="querydiv" align="left"><div id="querycontainer"></div></div><!--END AUTOCOMPLETE--></td>
+			<td class="searchbutton" colspan="1"><input type="submit" value="Search" /></td>
+		</tr>
+		<tr>
+			<td class="help" colspan="1"><a target="_blank" href="/shared/help/help.php/search/index.html" onclick="openHelp();return false;">Help</a></td>
+			<td class="advsearch" colspan="3"><a rel="nofollow" href="/advanced/advsearch.php?count=100&amp;q=xbt+polarstern+ant-xi%2F%2A&amp;minlat=&amp;minlon=&amp;maxlat=&amp;maxlon=&amp;mindate=&amp;maxdate=&amp;env=All" onclick="callAdvSearch();return false;">Advanced Search</a></td>
+			<td class="preferences" colspan="1"><a href="/advanced/preferences.php">Preferences</a></td>
+			<td class="more" colspan="1"><a href="/advanced/">more...</a></td>
+		</tr>
+	</table>
+</form>
+</div>
+</td>
+<td class="login">You are not logged in (<a target="_self" rel="nofollow" href="https://secure.pangaea.de/login/login.php?referer=http%3A%2F%2Fwww.pangaea.de%2Fsearch%3Fcount%3D100%26minlat%3D%26minlon%3D%26maxlat%3D%26maxlon%3D%26mindate%3D%26maxdate%3D%26env%3DAll%26q%3Dxbt%2Bpolarstern%2Bant-xi%252F%2A">LOG IN</a>)</td></tr>
+<tr><td class="info">We are sorry, due to serious hardware failure, no data service! Metadata is still accessible.<br />Always quote citation when using data!</td></tr>
+</table>
+</div>
+
+<!-- ************************************* Content ********************************************************* -->
+
+<script type="text/javascript">
+/* <![CDATA[ */
+
+function showMap() {
+    mapWindow=window.open('/shared/map/preparemap.php?wfsurl=http%3A%2F%2Fws.pangaea.de%2Fws%2Fwfs%2FPangaVista%2Fd207e63e34fb5bc9ad6fc71e5721931a%2Fc18e6b7fe91f663e8a93d9dfc1e0ab6a%3F&layername=Query%3A+xbt+polarstern+ant-xi%2F%2A&parentwnd=PVMainWnd_d207e63e34fb5bc9ad6fc71e5721931a','PVMapWnd_d207e63e34fb5bc9ad6fc71e5721931a','status=1,resizable=1,scrollbars=0,location=1,toolbar=1,width=800,height=500');
+    mapWindow.focus();
+}
+
+/* ]]> */
+</script>
+<div id="pagecontent">
+	<table class="pagetitle" summary="Layout">
+		<tr>
+			<td class="title">
+				<h1>3 datasets
+				<span class="countinfo">found on search for <strong title="Query: &raquo;xbt polarstern ant-xi/*&laquo;">&raquo;xbt polarstern...&laquo;</strong></span></h1>
+			</td>
+			<td class="showmap">
+				<a rel="nofollow" title="Display results in map" href="/advanced/nojs.php" onclick="showMap();return false;" class="actionbuttonlink"><span class="actionbutton">Show Map</span></a>
+			</td>
+		</tr>
+	</table>
+</div>
+
+<!-- Query time: 18ms for 3 datasets -->
+
+<div id="resultlist">
+<p>&lt;&lt; PREV | <strong>1</strong> | NEXT &gt;&gt;</p>
+<!--RESULT LIST START-->
+<ol start="1">
+<!--RESULT ITEM START-->
+<li>
+  <p class="citation">
+    <a href="http://doi.pangaea.de/10.1594/PANGAEA.672337" target="_self"><strong>Rohardt, G (2007): </strong>Water temperature profiles from 94 XBT drops along the track of cruise ANT-XI/1</a>
+  </p>
+  <table class="result" summary="Dataset reference and size" cellspacing="0" cellpadding="0">
+    <tr>
+      <td class="title">Size:</td>
+      <td class="content">70940 data points</td>
+    </tr>
+    <tr>
+      <td class="datasetid" colspan="2"><a href="http://doi.pangaea.de/10.1594/PANGAEA.672337" target="_self">doi:10.1594/PANGAEA.672337</a> - Score: <!--RELEVANCE START-->100%<!--RELEVANCE END--> - <a rel="nofollow" href="/search?q=similar%3A672337">Similar datasets</a></td>
+    </tr>
+  </table>
+</li><!--RESULT ITEM END-->
+<!--RESULT ITEM START-->
+<li>
+  <p class="citation">
+    <a href="http://doi.pangaea.de/10.1594/PANGAEA.672339" target="_self"><strong>Fahrbach, E (2007): </strong>Water temperature profiles from 144 XBT drops along the track of cruise ANT-XI/4</a>
+  </p>
+  <table class="result" summary="Dataset reference and size" cellspacing="0" cellpadding="0">
+    <tr>
+      <td class="title">Size:</td>
+      <td class="content">101716 data points</td>
+    </tr>
+    <tr>
+      <td class="datasetid" colspan="2"><a href="http://doi.pangaea.de/10.1594/PANGAEA.672339" target="_self">doi:10.1594/PANGAEA.672339</a> - Score: <!--RELEVANCE START-->100%<!--RELEVANCE END--> - <a rel="nofollow" href="/search?q=similar%3A672339">Similar datasets</a></td>
+    </tr>
+  </table>
+</li><!--RESULT ITEM END-->
+<!--RESULT ITEM START-->
+<li>
+  <p class="citation">
+    <a href="http://doi.pangaea.de/10.1594/PANGAEA.672338" target="_self"><strong>Fahrbach, E (2007): </strong>Water temperature profiles from 128 XBT drops along the track of cruise ANT-XI/2</a>
+  </p>
+  <table class="result" summary="Dataset reference and size" cellspacing="0" cellpadding="0">
+    <tr>
+      <td class="title">Reference:</td>
+      <td class="content"><strong>Gersonde, R (1995): </strong>Die Expedition ANTARKTIS-XI/2 mit FS Polarstern 1993/94 (The Expedition ANTARKTIS-XI/2 of RV Polarstern in 1993/94), <em>Reports on Polar Research, Alfred Wegener Institute for Polar and Marine Research, Bremerhaven</em></td>
+    </tr>
+    <tr>
+      <td class="title">Size:</td>
+      <td class="content">97132 data points</td>
+    </tr>
+    <tr>
+      <td class="datasetid" colspan="2"><a href="http://doi.pangaea.de/10.1594/PANGAEA.672338" target="_self">doi:10.1594/PANGAEA.672338</a> - Score: <!--RELEVANCE START-->86%<!--RELEVANCE END--> - <a rel="nofollow" href="/search?q=similar%3A672338">Similar datasets</a></td>
+    </tr>
+  </table>
+</li><!--RESULT ITEM END-->
+</ol>
+<!--RESULT LIST END-->
+<p>&lt;&lt; PREV | <strong>1</strong> | NEXT &gt;&gt;</p>
+
+<!-- WFS INFO:
+ * Base path:         http://ws.pangaea.de/ws/wfs/PangaVista/d207e63e34fb5bc9ad6fc71e5721931a/c18e6b7fe91f663e8a93d9dfc1e0ab6a?
+ * Capabilities path: http://ws.pangaea.de/ws/wfs/PangaVista/d207e63e34fb5bc9ad6fc71e5721931a/c18e6b7fe91f663e8a93d9dfc1e0ab6a?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetCapabilities
+-->
+
+</div>
+
+<!-- ************************************* Footer ********************************************************** -->
+
+<div id="footer">
+  <p class="infomail"><a href="/contact/">Contact</a></p>
+</div>
+
+</body>
+</html>
