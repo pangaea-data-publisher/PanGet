@@ -4,7 +4,7 @@ echo PanGet
 
 echo - macdeployqt
 
-cd ~/Development/aforge/panget
+cd ~/Development/GitHub/PanGet
 
 rm -R '../../Distribution/PanGet/PanGet.app'
 cp -R './PanGet-build-Desktop_Qt_5_3_2_LLDB-Release/PanGet.app' '../../Distribution/PanGet/PanGet.app'
