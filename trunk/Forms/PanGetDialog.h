@@ -46,6 +46,7 @@ private:
     QString getVersion();
 
     int readFile( const QString &FilenameIn, QStringList &Input, const int Codec = -1, const qint64 i_Bytes = 0 );
+    int downloadFile( const QString &Url, const QString &absoluteFilePath );
 
     void loadPreferences( int &NumOfProgramStarts, int &Dialog_X, int &Dialog_Y, int &Dialog_Width, QString &IDListFile, QString &DownloadDirectory, int &CodecDownload );
     void savePreferences( const int NumOfProgramStarts, const int Dialog_X, const int Dialog_Y, const int Dialog_Width, const QString &IDListFile, const QString &DownloadDirectory, const int CodecDownload );
