@@ -898,7 +898,8 @@ void PanGetDialog::initFileProgress( const int i_NumOfFiles, const QString& s_Me
         FileProgressDialog = new QProgressDialog( s_MessageText, "Abort", 0, i_NumOfFiles, this );
 
         FileProgressDialog->setWindowModality( Qt::WindowModal );
-        FileProgressDialog->setMinimumDuration( 0 );
+        FileProgressDialog->setMinimumDuration( 2 );
+        FileProgressDialog->show();
         FileProgressDialog->setValue( 0 );
 
 //		setStatusBar( tr( "File in progress: " ) + QDir::toNativeSeparators( s_FilenameIn ) );
