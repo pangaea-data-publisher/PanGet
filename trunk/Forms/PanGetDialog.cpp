@@ -5,6 +5,7 @@
 #include <QtWidgets>
 
 #include "PanGetDialog.h"
+#include "ui_pangetdialog.h"
 
 const int	_NOERROR_                = 0;
 const int	_ERROR_                  = 1;
@@ -16,7 +17,7 @@ const int   _UTF8_                   = 0;    // UTF-8
 const int   _APPLEROMAN_             = 1;    // Apple Roman
 const int   _LATIN1_                 = 2;    // Latin-1 = ISO 8859-1
 
-PanGetDialog::PanGetDialog(QWidget *parent) : QDialog(parent)
+PanGetDialog::PanGetDialog(QWidget *parent) : QWidget(parent)
 {
     int     i_Dialog_Width       = 600;
     int     i_Dialog_X           = 10;
@@ -31,8 +32,6 @@ PanGetDialog::PanGetDialog(QWidget *parent) : QDialog(parent)
 
 // **********************************************************************************************
 // Dialog
-
-    setupUi( this );
 
     connect( BuildScriptButton, SIGNAL( clicked() ), this, SLOT( buildScript() ) );
     connect( QuitButton, SIGNAL( clicked() ), this, SLOT( reject() ) );
@@ -50,6 +49,9 @@ PanGetDialog::PanGetDialog(QWidget *parent) : QDialog(parent)
 
     this->move( i_Dialog_X, i_Dialog_Y );
     this->resize( i_Dialog_Width, minimumHeight() );
+    this->setWindowTitle( "PanGet - V3.0" );
+    this->setSizeGripEnabled( true );
+    this->setAcceptDrops( true );
 
     if ( gi_NumOfProgramStarts++ < 1 )
         savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_IDListFile, s_DownloadDirectory, i_CodecDownload );
@@ -91,6 +93,8 @@ PanGetDialog::PanGetDialog(QWidget *parent) : QDialog(parent)
     enableBuildButton();
 
     BuildScriptButton->setFocus();
+
+    this->show();
 }
 
 // **********************************************************************************************
@@ -691,7 +695,7 @@ QString PanGetDialog::getVersion()
 
 // **********************************************************************************************
 
-    s_Url              = QLatin1String( "http://www.pangaea.de/software" ) + "/" + QCoreApplication::applicationName() + "/" + QCoreApplication::applicationName() + QLatin1String( "_version.txt" );
+    s_Url              = QLatin1String( "https://pangaea.de/software" ) + "/" + QCoreApplication::applicationName() + "/" + QCoreApplication::applicationName() + QLatin1String( "_version.txt" );
     s_Version_Filename = getDataLocation() + "/" + QCoreApplication::applicationName() + QLatin1String( "_version.txt" );
 
     err = downloadFile( s_Url, s_Version_Filename );
