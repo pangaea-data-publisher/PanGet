@@ -262,7 +262,7 @@ void PanGetDialog::buildScript()
     if ( b_isURL == true )
         s_Domain = sl_Data.at( 0 ).section( "/", 0, 2 ); // eg. http://iodp.tamu.edu/
     else
-        s_Domain = "http://doi.pangaea.de"; // PANGAEA datasets
+        s_Domain = "https://doi.pangaea.de"; // PANGAEA datasets
 
 // **********************************************************************************************
 
@@ -283,7 +283,7 @@ void PanGetDialog::buildScript()
         {
             s_DatasetID = sl_Data.at( i ).section( "\t", 0, 0 );
 
-            s_DatasetID.replace( tr( "http://doi.pangaea.de/10.1594/PANGAEA." ), tr( "" ) );
+            s_DatasetID.replace( tr( "https://doi.pangaea.de/10.1594/PANGAEA." ), tr( "" ) );
             s_DatasetID.replace( tr( "doi:10.1594/PANGAEA." ), tr( "" ) );
             s_DatasetID.replace( tr( "Dataset ID: " ), tr( "" ) );
             s_DatasetID.replace( tr( ", unpublished dataset" ), tr( "" ) );
