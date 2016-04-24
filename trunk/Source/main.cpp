@@ -2,13 +2,11 @@
 /* 2012-06-20                 */
 /* Dr. Rainer Sieger          */
 
-#include <QApplication>
 #include <QLoggingCategory>
 
 #include "PanGetDialog.h"
-#include "ui_pangetdialog.h"
 
-int main( int argc, char *argv[] )
+int main( int argc, char ** argv )
 {
     QLoggingCategory::setFilterRules( "qt.network.ssl.warning=false" ); // disables the QSslSocket warning
 
@@ -18,10 +16,13 @@ int main( int argc, char *argv[] )
     QApplication::setOrganizationDomain( "pangaea.de" );
     QApplication::setApplicationName( "PanGet" );
 
-    QWidget *dialog = new QWidget;
-    Ui::PanGetDialog ui;
-    ui.setupUi(dialog);
-    dialog->show();
+    PanGetDialog dialog;
+
+    dialog.setWindowTitle( "PanGet - V3.1" );
+    dialog.setSizeGripEnabled( true );
+    dialog.setAcceptDrops( true );
+
+    dialog.show();
 
     return app.exec();
 }

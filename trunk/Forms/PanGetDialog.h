@@ -2,7 +2,8 @@
 /* 2016-04-24                 */
 /* Dr. Rainer Sieger          */
 
-#include <QWidget>
+#include <QtWidgets/QApplication>
+
 #include <QDialog>
 #include <QTextEdit>
 #include <QTextStream>
@@ -27,15 +28,14 @@ class QDomElement;
 class QIODevice;
 class QProgressDialog;
 
-class PanGetDialog : public QWidget, public Ui::PanGetDialog
+class PanGetDialog : public QDialog, public Ui::PanGetDialog
 {
     Q_OBJECT
-
     Q_CLASSINFO( "author", "Rainer Sieger" )
     Q_CLASSINFO( "url", "https://pangaea.de" )
 
 public:
-    PanGetDialog(QWidget *parent = 0);
+    PanGetDialog( QWidget *parent = 0 );
     int gi_NumOfProgramStarts;  //!< Anzahl der Programmstarts
 
 private:
@@ -51,9 +51,11 @@ private:
     void loadPreferences( int &NumOfProgramStarts, int &Dialog_X, int &Dialog_Y, int &Dialog_Width, QString &IDListFile, QString &DownloadDirectory, int &CodecDownload );
     void savePreferences( const int NumOfProgramStarts, const int Dialog_X, const int Dialog_Y, const int Dialog_Width, const QString &IDListFile, const QString &DownloadDirectory, const int CodecDownload );
 
-    void initFileProgress( const int NumOfFiles, const QString &MessageText );
+    void initFileProgress( const int NumOfFiles, const QString &FilenameIn, const QString &MessageText );
     int incFileProgress( const int NumOfFiles, const int FileNumber );
     void resetFileProgress( const int NumOfFiles );
+
+    QString setExtension( const int Extension );
 
     void wait( const int msecs = 0 );
 
