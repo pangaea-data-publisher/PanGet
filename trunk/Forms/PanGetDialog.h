@@ -1,8 +1,6 @@
 /* PanGetDialog.h             */
-/* 2013-05-15                 */
+/* 2016-04-24                 */
 /* Dr. Rainer Sieger          */
-
-//#include <QtWidgets/QApplication>
 
 #include <QWidget>
 #include <QDialog>
@@ -29,9 +27,10 @@ class QDomElement;
 class QIODevice;
 class QProgressDialog;
 
-class PanGetDialog : public QWidget
+class PanGetDialog : public QWidget, public Ui::PanGetDialog
 {
     Q_OBJECT
+
     Q_CLASSINFO( "author", "Rainer Sieger" )
     Q_CLASSINFO( "url", "https://pangaea.de" )
 
@@ -60,8 +59,6 @@ private:
 
     QProgressDialog *FileProgressDialog;
     QTextEdit       *textViewer;
-
-    Ui::PanGetDialog ui;
 
 private slots:
     void enableBuildButton();
