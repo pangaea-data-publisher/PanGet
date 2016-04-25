@@ -49,7 +49,7 @@ cd '/Volumes/PanGet'
 rm -rf .fseventsd
 mkdir .fseventsd
 touch .fseventsd/no_log
-cd ~/Development/Distribution
+cd ~/Development/Distribution/PanGet
 
 echo - verify package
 
@@ -57,3 +57,11 @@ codesign -d '/Volumes/PanGet/PanGet.app'
 
 echo
 hdiutil detach '/Volumes/PanGet'
+
+echo - move application
+
+rm -R /Applications/PanGet.app
+cp -R PanGet.app /Applications
+cd ~/Development/Distribution
+
+echo - finished
