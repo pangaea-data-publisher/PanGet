@@ -7,10 +7,10 @@ echo - macdeployqt
 cd ~/Development/GitHub/PanGet
 
 rm -R '../../Distribution/PanGet/PanGet.app'
-cp -R './build-PanGet-Desktop_Qt_5_6_1_clang_64bit-Release/PanGet.app' '../../Distribution/PanGet/PanGet.app'
+cp -R './build-PanGet-Desktop_Qt_5_7_0_clang_64bit2-Release/PanGet.app' '../../Distribution/PanGet/PanGet.app'
 cp './trunk/Resources/Info.plist' '../../Distribution/PanGet/PanGet.app/Contents/Info.plist'
 
-/Developer/Qt/5.6/clang_64/bin/macdeployqt '../../Distribution/PanGet/PanGet.app'
+/Developer/Qt/5.7/clang_64/bin/macdeployqt '../../Distribution/PanGet/PanGet.app'
 
 echo - code signing
 
@@ -28,6 +28,7 @@ codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Insti
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/imageformats/libqicns.dylib'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/imageformats/libqico.dylib'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/imageformats/libqjpeg.dylib'
+codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/imageformats/libqmacjp2.dylib'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/imageformats/libqtga.dylib'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/imageformats/libqtiff.dylib'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/imageformats/libqwbmp.dylib'
