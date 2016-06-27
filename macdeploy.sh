@@ -36,7 +36,7 @@ codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Insti
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/platforms/libqcocoa.dylib'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/printsupport/libcocoaprintersupport.dylib'
 
-codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app' # --entitlements './trunk/Resources/PanGet.entitlements'
+codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app'
 
 echo - mount package
 
