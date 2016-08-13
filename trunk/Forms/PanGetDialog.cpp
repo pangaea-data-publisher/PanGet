@@ -915,7 +915,7 @@ void PanGetDialog::dropEvent( QDropEvent *event )
 // **********************************************************************************************
 // **********************************************************************************************
 
-void PanGetDialog::initFileProgress( const int i_NumOfFiles, const QString& s_FilenameIn, const QString& s_MessageText )
+void PanGetDialog::initFileProgress( const int i_NumOfFiles, const QString &s_FilenameIn, const QString &s_MessageText )
 {
     if ( i_NumOfFiles > 1 )
     {
