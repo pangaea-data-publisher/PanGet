@@ -29,7 +29,7 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
     int     i_CodecDownload      = _UTF8_;
     int		i_minWidth			 = 8*fontMetrics().width( 'w' ) + 2;
 
-    QString s_Version            = "PanGet V3.1";
+    QString s_Version            = "PanGet V3.2";
     QString s_IDListFile		 = "";
     QString s_DownloadDirectory	 = "";
 
@@ -236,10 +236,13 @@ void PanGetDialog::buildScript()
         if ( sl_Input.at( 0 ).section( "\t", 0, 0 ).toLower() == "url" )
             b_isURL = true;
 
-        if ( sl_Input.at( 0 ).section( "\t", 1, 1 ).toLower() == "export filename" )
-            b_ExportFilenameExists = true;
+        if ( sl_Input.at( 0 ).section( "\t", 0, 0 ).toLower() == "uri" )
+            b_isURL = true;
 
         if ( sl_Input.at( 0 ).section( "\t", 1, 1 ).toLower() == "filename" )
+            b_ExportFilenameExists = true;
+
+        if ( sl_Input.at( 0 ).section( "\t", 1, 1 ).toLower() == "file name" )
             b_ExportFilenameExists = true;
 
         if ( sl_Input.at( 0 ).section( "\t", 1, 1 ).toLower() == "file" )
@@ -351,24 +354,27 @@ void PanGetDialog::buildScript()
         {
             if ( ( s_Url.isEmpty() == false ) || ( s_DatasetID.toInt() >= 50000 ) )
             {
-                s_ExportFilename = s_DownloadDirectory + "/" + s_ExportFilename + setExtension( i_Extension );
+                s_ExportFilename = s_DownloadDirectory + "/" + s_ExportFilename;
 
                 if ( b_isURL == false )
+                {
+                    s_ExportFilename.append( setExtension( i_Extension ) );
                     s_Url = s_Domain + "/10.1594/PANGAEA." + s_DatasetID + "?format=textfile";
 
-                switch ( i_CodecDownload )
-                {
-                case _LATIN1_:
-                    s_Url.append( "&charset=ISO-8859-1" );
-                    break;
+                    switch ( i_CodecDownload )
+                    {
+                    case _LATIN1_:
+                        s_Url.append( "&charset=ISO-8859-1" );
+                        break;
 
-                case _APPLEROMAN_:
-                    s_Url.append( "&charset=x-MacRoman" );
-                    break;
+                    case _APPLEROMAN_:
+                        s_Url.append( "&charset=x-MacRoman" );
+                        break;
 
-                default:
-                    s_Url.append( "&charset=UTF-8" );
-                    break;
+                    default:
+                        s_Url.append( "&charset=UTF-8" );
+                        break;
+                    }
                 }
 
                 downloadFile( s_Url, s_ExportFilename );
