@@ -402,7 +402,7 @@ void PanGetDialog::buildScript()
                 }
                 else
                 {
-                    if ( ( ( s_ExportFilename.toLower().endsWith( ".txt" ) == true ) || ( s_ExportFilename.toLower().endsWith( ".csv" ) == true ) ) && ( readFile( s_ExportFilename, sl_Input, _SYSTEM_, 8000 ) > 0 ) )
+                    if ( ( b_isURL == false ) && ( ( s_ExportFilename.toLower().endsWith( ".txt" ) == true ) || ( s_ExportFilename.toLower().endsWith( ".csv" ) == true ) ) && ( readFile( s_ExportFilename, sl_Input, _SYSTEM_, 8000 ) > 0 ) )
                     {
                         if ( sl_Input.at( 0 ).startsWith( "/* DATA DESCRIPTION:" ) == false  )
                         {
