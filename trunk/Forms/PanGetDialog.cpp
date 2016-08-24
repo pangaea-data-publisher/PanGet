@@ -463,7 +463,7 @@ void PanGetDialog::buildScript()
 
                     #if defined(Q_OS_WIN)
                         QString s_curl = QDir::toNativeSeparators( QCoreApplication::applicationDirPath() + "/" + "curl.exe" );
-                        process.start( s_curl + " -o \"" + QDir::toNativeSeparators( s_ExportFilename ) + "\"" + " " + s_Url );
+                        process.start( "\"" + s_curl + "\" -o \"" + QDir::toNativeSeparators( s_ExportFilename ) + "\"" + " " + s_Url );
                         process.waitForFinished( -1 );
                     #endif
 
