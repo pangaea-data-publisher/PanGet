@@ -357,7 +357,7 @@ void PanGetDialog::buildScript()
 
         if ( b_DownloadData == true )
         {
-            if ( ( s_Url.isEmpty() == false ) || ( s_DatasetID.toInt() >= 50000 ) )
+            if ( ( b_isURL == true ) || ( s_DatasetID.toInt() >= 50000 ) )
             {
                 s_ExportFilename = s_DownloadDirectory + "/" + s_ExportFilename;
 
@@ -478,7 +478,6 @@ void PanGetDialog::buildScript()
 
                         tout << s_Url << "\t" << QDir::toNativeSeparators( s_ExportFilename ) << "\t" << "login required or file not found" << s_EOL;
                     }
-
                 }
 
                 wait( 100 );
