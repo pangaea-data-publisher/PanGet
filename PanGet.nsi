@@ -57,6 +57,7 @@ Section "MainSection" SEC01
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\libwinpthread-1.dll"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\libeay32.dll"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\ssleay32.dll"
+  File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\curl.exe"
 
   SetOutPath "$INSTDIR\platforms"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\platforms\qminimal.dll"
@@ -106,6 +107,7 @@ FunctionEnd
 
 Section Uninstall
   Delete "$INSTDIR\PanGet.exe"
+  Delete "$INSTDIR\curl.exe"  
   Delete "$INSTDIR\Qt5Core.dll"
   Delete "$INSTDIR\Qt5Gui.dll"
   Delete "$INSTDIR\Qt5Network.dll"
