@@ -192,13 +192,6 @@ void PanGetDialog::buildScript()
     }
 
 // **********************************************************************************************
-
-    if ( b_isURL == true )
-        tout << "URL\tfile name\tComment" << endl;
-    else
-        tout << "*ID\tExport file name\tComment" << endl;
-
-// **********************************************************************************************
 // Read data and build dataset list
 
     if ( ( sl_Input.at( 0 ).startsWith( "<html>", Qt::CaseInsensitive ) == true ) || ( sl_Input.at( 0 ).startsWith( "<!doctype html", Qt::CaseInsensitive ) == true ) || ( sl_Input.at( 0 ).startsWith( "PANGAEA Home </>" ) == true ) )
@@ -262,6 +255,13 @@ void PanGetDialog::buildScript()
                 sl_Data.append( s_Data );
         }
     }
+
+// **********************************************************************************************
+
+    if ( b_isURL == true )
+        tout << "URL\tfile name\tComment" << endl;
+    else
+        tout << "*ID\tExport file name\tComment" << endl;
 
 // **********************************************************************************************
 
