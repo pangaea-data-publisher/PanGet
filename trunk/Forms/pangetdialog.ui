@@ -41,7 +41,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="BuildScriptButton">
+      <widget class="QPushButton" name="GetDatasetsButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -181,7 +181,7 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>BuildScriptButton</tabstop>
+  <tabstop>GetDatasetsButton</tabstop>
   <tabstop>QuitButton</tabstop>
  </tabstops>
  <resources/>

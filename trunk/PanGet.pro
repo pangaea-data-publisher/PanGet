@@ -30,10 +30,6 @@ macx {
 }
 
 win32 {
-    # OpenSSL
-    LIBS += -LC:/Qt/OpenSSL-Win32/bin -lubsec
-    INCLUDEPATH += C:/Qt/OpenSSL-Win32/include
-
     # Icon
     RC_FILE = ./Resources/Application.rc
 }
@@ -48,12 +44,10 @@ QT += widgets network
 
 INCLUDEPATH = ./Forms
 
-HEADERS     = ./Forms/PanGetDialog.h \
-              ./Forms/Webfile.h
+HEADERS     = ./Forms/PanGetDialog.h
 
 FORMS       = ./Forms/pangetdialog.ui
 
 SOURCES     = ./Source/main.cpp \
-              ./Forms/Webfile.cpp \
               ./Forms/PanGetDialog.cpp
 

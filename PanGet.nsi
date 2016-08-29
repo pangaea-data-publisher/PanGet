@@ -48,6 +48,7 @@ RequestExecutionLevel admin
 Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\PanGet.exe"
+  File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\curl.exe"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\Qt5Core.dll"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\Qt5Gui.dll"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\Qt5Network.dll"
@@ -55,8 +56,6 @@ Section "MainSection" SEC01
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\libgcc_s_dw2-1.dll"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\libstdc++-6.dll"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\libwinpthread-1.dll"
-  File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\libeay32.dll"
-  File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\ssleay32.dll"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\curl.exe"
 
   SetOutPath "$INSTDIR\platforms"
@@ -115,8 +114,6 @@ Section Uninstall
   Delete "$INSTDIR\libgcc_s_dw2-1.dll"
   Delete "$INSTDIR\libstdc++-6.dll"
   Delete "$INSTDIR\libwinpthread-1.dll"
-  Delete "$INSTDIR\libeay32.dll"
-  Delete "$INSTDIR\ssleay32.dll"
   Delete "$INSTDIR\platforms\qminimal.dll"
   Delete "$INSTDIR\platforms\qwindows.dll"
   Delete "$INSTDIR\uninst.exe"

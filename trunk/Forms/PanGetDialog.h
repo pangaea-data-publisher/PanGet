@@ -21,7 +21,6 @@
 #ifndef PANGETDIALOG_H
 #define PANGETDIALOG_H
 
-#include "Webfile.h"
 #include "ui_pangetdialog.h"
 
 class QDomElement;
@@ -45,8 +44,9 @@ private:
     QString getPreferenceFilename();
     QString getVersion();
 
+    int removeFile( const QString &Filename );
     int readFile( const QString &FilenameIn, QStringList &Input, const int Codec = -1, const qint64 i_Bytes = 0 );
-    int downloadFile( const QString &Url, const QString &absoluteFilePath );
+    int downloadFile( const QString &Curl, const QString &Url, const QString &Filename );
 
     void loadPreferences( int &NumOfProgramStarts, int &Dialog_X, int &Dialog_Y, int &Dialog_Width, QString &IDListFile, QString &DownloadDirectory, int &CodecDownload );
     void savePreferences( const int NumOfProgramStarts, const int Dialog_X, const int Dialog_Y, const int Dialog_Width, const QString &IDListFile, const QString &DownloadDirectory, const int CodecDownload );
@@ -56,6 +56,7 @@ private:
     void resetFileProgress( const int NumOfFiles );
 
     QString setExtension( const int Extension );
+    QString findCurl();
 
     void wait( const int msecs = 0 );
 
@@ -66,7 +67,7 @@ private slots:
     void enableBuildButton();
     void browseIDListFileDialog();
     void browseDownloadDirectoryDialog();
-    void buildScript();
+    void getDatasets();
     void displayHelp();
 
 protected:
