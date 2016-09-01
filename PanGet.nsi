@@ -57,6 +57,7 @@ Section "MainSection" SEC01
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\libstdc++-6.dll"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\libwinpthread-1.dll"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\curl.exe"
+  File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\curl-ca-bundle.crt"
 
   SetOutPath "$INSTDIR\platforms"
   File "C:\Users\rsieger\Documents\Development\Distribution\PanGet\platforms\qminimal.dll"
@@ -122,6 +123,7 @@ Section Uninstall
   Delete "$INSTDIR\License\gpl-3.0.txt"
   Delete "$INSTDIR\Example\example.txt"
   Delete "$INSTDIR\Example\example.htm"
+  Delete "$INSTDIR\curl-ca-bundle.crt"
   
   Delete "$SMPROGRAMS\PANGAEA\PanGet\Uninstall.lnk"
   Delete "$SMPROGRAMS\PANGAEA\PanGet\PanGet.lnk"
