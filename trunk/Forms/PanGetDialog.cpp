@@ -789,7 +789,7 @@ QString PanGetDialog::getDataLocation()
     QString s_DataLocation = "";
 
     #if defined(Q_OS_LINUX)
-        s_DataLocation = QDir::homePath() + "/.config/" ) + QCoreApplication::organizationName() + "/" + getApplicationName( true );
+        s_DataLocation = QDir::homePath() + QLatin1String( "/.config/" ) + QCoreApplication::organizationName() + "/" + getApplicationName( true );
     #endif
 
     #if defined(Q_OS_MAC)
