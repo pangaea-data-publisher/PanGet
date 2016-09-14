@@ -735,7 +735,7 @@ QString PanGetDialog::getVersion()
 
 // **********************************************************************************************
 
-    s_Url              = QLatin1String( "https://pangaea.de/software" ) + "/" + QCoreApplication::applicationName() + "/" + QCoreApplication::applicationName() + QLatin1String( "_version.txt" );
+    s_Url              = QLatin1String( "https://store.pangaea.de/software" ) + "/" + QCoreApplication::applicationName() + "/" + QCoreApplication::applicationName() + QLatin1String( "_version.txt" );
     s_Version_Filename = getDataLocation() + "/" + QCoreApplication::applicationName() + QLatin1String( "_version.txt" );
 
     err = downloadFile( findCurl(), s_Url, s_Version_Filename );
