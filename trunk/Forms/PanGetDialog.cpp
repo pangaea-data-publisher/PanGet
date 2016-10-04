@@ -20,9 +20,6 @@ const int   _LATIN1_                 = 2;    // Latin-1 = ISO 8859-1
 const int   _TXT_                    = 0;
 const int   _CSV_                    = 1;
 
-const int   _UNIX_                   = 0;
-const int   _WIN_                    = 1;
-
 // **********************************************************************************************
 
 PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
@@ -42,24 +39,19 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
     bool    b_DownloadCitation   = false;
     bool    b_DownloadMetadata   = false;
     int     i_CodecDownload      = _UTF8_;
-    int     i_EOL                = _UNIX_;
     int     i_Extension          = _TXT_;
 
     #if defined(Q_OS_LINUX)
         i_CodecDownload          = _UTF8_;
-        i_EOL                    = _UNIX_;
     #endif
 
     #if defined(Q_OS_MAC)
         i_CodecDownload          = _APPLEROMAN_;
-        i_EOL                    = _UNIX_;
     #endif
 
     #if defined(Q_OS_WIN)
         i_CodecDownload          = _LATIN1_;
-        i_EOL                    = _WIN_;
     #endif
-
 
 // **********************************************************************************************
 // Dialog
@@ -81,13 +73,13 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
 // **********************************************************************************************
 // load preferences
 
-    loadPreferences( gi_NumOfProgramStarts, i_Dialog_X, i_Dialog_Y, i_Dialog_Width, s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_EOL, i_Extension );
+    loadPreferences( gi_NumOfProgramStarts, i_Dialog_X, i_Dialog_Y, i_Dialog_Width, s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_Extension );
 
     this->move( i_Dialog_X, i_Dialog_Y );
     this->resize( i_Dialog_Width, 250 );
 
     if ( gi_NumOfProgramStarts++ < 1 )
-        savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_EOL, i_Extension );
+        savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_Extension );
 
 // **********************************************************************************************
 // set Codec
@@ -129,6 +121,24 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
 
 // **********************************************************************************************
 
+    switch ( i_Extension )
+    {
+    case _CSV_:
+        CSV_radioButton->setChecked( true );
+        break;
+    default:
+        TXT_radioButton->setChecked( true );
+        break;
+    }
+
+// **********************************************************************************************
+
+    DownloadData_checkBox->setChecked( b_DownloadData );
+    DownloadCitation_checkBox->setChecked( b_DownloadCitation );
+    DownloadMetadata_checkBox->setChecked( b_DownloadMetadata );
+
+// **********************************************************************************************
+
     FileTextLabel->setMinimumWidth( i_minWidth );
     DirTextLabel->setMinimumWidth( i_minWidth );
 
@@ -154,38 +164,39 @@ void PanGetDialog::getDatasets()
     int i_totalNumOfDownloads	= 0;
     int i_removedDatasets		= 0;
 
-    QString s_EOL                           = "\n"; // CR+LF if compiled on Windows!
+    QString s_EOL               = "\n"; // CR+LF if compiled on Windows!
 
-    QString s_Message						= "";
-    QString s_DatasetID						= "";
-    QString	s_Data							= "";
-    QString s_Domain                        = "";
-    QString s_Filename				        = "";
-    QString s_Url							= "";
-    QString s_Curl                          = "";
-    QString s_tempFile                      = "";
+    QString s_Message			= "";
+    QString s_DatasetID			= "";
+    QString	s_Data				= "";
+    QString s_Domain            = "";
+    QString s_Filename			= "";
+    QString s_Url				= "";
+    QString s_Curl              = "";
+    QString s_tempFile          = "";
 
-    QString s_PathDir                       = "";
-    QString s_PathFile                      = "";
+    QString s_PathDir           = "";
+    QString s_PathFile          = "";
 
     QStringList	sl_Queries;
     QStringList sl_DatasetIDs;
     QStringList sl_Data;
 
-    bool	b_ExportFileExists  			= false;
-    bool	b_isURL             			= false;
+    bool	b_ExportFileExists  = false;
+    bool	b_isURL             = false;
 
-    int i_Extension                         = _TXT_;
+// **********************************************************************************************
 
-    bool    b_DownloadCitation              = false;
-    bool    b_DownloadMetadata              = false;
-    bool    b_DownloadData                  = true;
+    bool    b_DownloadData      = DownloadData_checkBox->isChecked();
+    bool    b_DownloadCitation  = DownloadCitation_checkBox->isChecked();
+    bool    b_DownloadMetadata  = DownloadMetadata_checkBox->isChecked();
 
-    int     i_CodecDownload                 = CodecDownload_ComboBox->currentIndex();
+    int     i_CodecDownload     = CodecDownload_ComboBox->currentIndex();
+    int     i_Extension         = CSV_radioButton->isChecked(); // true = 1 = _CSV_ ; false = 0 = _TXT_
 
-    QString s_DownloadDirectory				= DownloadDirectoryLineEdit->text();
-    QString s_Query                         = QueryLineEdit->text();
-    QString s_IDListFile					= IDListFileLineEdit->text();
+    QString s_DownloadDirectory	= DownloadDirectoryLineEdit->text();
+    QString s_Query             = QueryLineEdit->text();
+    QString s_IDListFile		= IDListFileLineEdit->text();
 
 // **********************************************************************************************
 
@@ -195,7 +206,9 @@ void PanGetDialog::getDatasets()
         DownloadDirectoryLineEdit->setText( QDir::toNativeSeparators( s_DownloadDirectory ) );
     }
 
-    savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_EOL, i_Extension );
+// **********************************************************************************************
+
+    savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_Extension );
 
 // **********************************************************************************************
 // read ID list
@@ -237,9 +250,9 @@ void PanGetDialog::getDatasets()
     QFile fout;
 
     if ( s_PathDir != s_PathFile )
-        fout.setFileName( fidd.absoluteFilePath().section( "/", 0, fidd.absoluteFilePath().count( "/" )-1 ) + "/" + fidd.absoluteFilePath().section( "/", -1, -1 ) + "_failed.txt" );
+        fout.setFileName( fidd.absoluteFilePath().section( "/", 0, fidd.absoluteFilePath().count( "/" )-1 ) + "/" + fidd.absoluteFilePath().section( "/", -1, -1 ) + "_failed" + setExtension( i_Extension ) );
     else
-        fout.setFileName( fifailed.absolutePath() + "/" + fifailed.completeBaseName() + "_failed.txt" );
+        fout.setFileName( fifailed.absolutePath() + "/" + fifailed.completeBaseName() + "_failed" + setExtension( i_Extension ) );
 
     if ( fout.open( QIODevice::WriteOnly | QIODevice::Text ) == false )
         return;
@@ -499,7 +512,6 @@ void PanGetDialog::getDatasets()
                 }
 
                 wait( 100 );
-
             }
             else
             {
@@ -585,37 +597,34 @@ int PanGetDialog::checkFile( const QString &s_Filename, const bool isbinary )
 
 // **********************************************************************************************
 
-    if ( ( s_Filename.toLower().endsWith( ".txt" ) == true ) || ( s_Filename.toLower().endsWith( ".csv" ) == true ) )
+    if ( readFile( s_Filename, sl_Input, _SYSTEM_, 8000 ) > 0 )
     {
-        if ( readFile( s_Filename, sl_Input, _SYSTEM_, 8000 ) > 0 )
+        if ( sl_Input.at( 0 ).startsWith( "/* DATA DESCRIPTION:" ) == false  )
         {
-            if ( sl_Input.at( 0 ).startsWith( "/* DATA DESCRIPTION:" ) == false  )
-            {
-                sl_Result = sl_Input.filter( "was substituted by an other version at" );
+            sl_Result = sl_Input.filter( "was substituted by an other version at" );
 
-                if ( sl_Result.count() > 0 )
-                    return( -20 );
+            if ( sl_Result.count() > 0 )
+                return( -20 );
 
-                sl_Result = sl_Input.filter( "TEXTFILE format is not available for collection data sets!" );
+            sl_Result = sl_Input.filter( "TEXTFILE format is not available for collection data sets!" );
 
-                if ( sl_Result.count() > 0 )
-                    return( -30 );
+            if ( sl_Result.count() > 0 )
+                return( -30 );
 
-                sl_Result = sl_Input.filter( "No data available!" );
+            sl_Result = sl_Input.filter( "No data available!" );
 
-                if ( sl_Result.count() > 0 )
-                    return( -40 );
+            if ( sl_Result.count() > 0 )
+                return( -40 );
 
-                sl_Result = sl_Input.filter( "A data set identified by" );
+            sl_Result = sl_Input.filter( "A data set identified by" );
 
-                if ( sl_Result.count() > 0 )
-                    return( -50 );
+            if ( sl_Result.count() > 0 )
+                return( -50 );
 
-                sl_Result = sl_Input.filter( "The dataset is currently not available for download. Try again later!" );
+            sl_Result = sl_Input.filter( "The dataset is currently not available for download. Try again later!" );
 
-                if ( sl_Result.count() > 0 )
-                    return( -60 );
-            }
+            if ( sl_Result.count() > 0 )
+                return( -60 );
         }
     }
 
@@ -706,9 +715,9 @@ QString PanGetDialog::getPreferenceFilename()
 // **********************************************************************************************
 // **********************************************************************************************
 // **********************************************************************************************
-// 19.4.2003
+// 2016-10-04
 
-void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_Dialog_X, const int i_Dialog_Y, const int i_Dialog_Width, const QString &s_Query, const QString &s_IDListFile, const QString &s_DownloadDirectory, const bool b_DownloadData, const bool b_DownloadCitation, const bool b_DownloadMetadata, const int i_CodecDownload, const int i_EOL, const int i_Extension )
+void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_Dialog_X, const int i_Dialog_Y, const int i_Dialog_Width, const QString &s_Query, const QString &s_IDListFile, const QString &s_DownloadDirectory, const bool b_DownloadData, const bool b_DownloadCitation, const bool b_DownloadMetadata, const int i_CodecDownload, const int i_Extension )
 {
     #if defined(Q_OS_LINUX)
         QSettings settings( getPreferenceFilename(), QSettings::IniFormat );
@@ -736,7 +745,6 @@ void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_
     settings.setValue( "DownloadCitation", b_DownloadCitation );
     settings.setValue( "DownloadMetadata", b_DownloadMetadata );
     settings.setValue( "CodecDownload", i_CodecDownload );
-    settings.setValue( "EOL", i_EOL );
     settings.setValue( "Extension", i_Extension );
     settings.endGroup();
 }
@@ -744,9 +752,9 @@ void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_
 // **********************************************************************************************
 // **********************************************************************************************
 // **********************************************************************************************
-// 10.03.2007
+// 2016-10-04
 
-void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, int &i_Dialog_Y, int &i_Dialog_Width, QString &s_Query, QString &s_IDListFile, QString &s_DownloadDirectory, bool &b_DownloadData, bool &b_DownloadCitation, bool &b_DownloadMetadata, int &i_CodecDownload, int &i_EOL, int &i_Extension )
+void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, int &i_Dialog_Y, int &i_Dialog_Width, QString &s_Query, QString &s_IDListFile, QString &s_DownloadDirectory, bool &b_DownloadData, bool &b_DownloadCitation, bool &b_DownloadMetadata, int &i_CodecDownload, int &i_Extension )
 {
     #if defined(Q_OS_LINUX)
         QSettings settings( getPreferenceFilename(), QSettings::IniFormat );
@@ -774,7 +782,6 @@ void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, 
     b_DownloadCitation  = settings.value( "DownloadCitation", false ).toBool();
     b_DownloadMetadata  = settings.value( "DownloadMetadata", false ).toBool();
     i_CodecDownload     = settings.value( "CodecDownload", 0 ).toInt();
-    i_EOL               = settings.value( "EOL", i_EOL ).toInt();
     i_Extension         = settings.value( "Extension", _TXT_ ).toInt();
     settings.endGroup();
 }
