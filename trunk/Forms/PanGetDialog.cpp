@@ -20,6 +20,8 @@ const int   _LATIN1_                 = 2;    // Latin-1 = ISO 8859-1
 const int   _TXT_                    = 0;
 const int   _CSV_                    = 1;
 
+// **********************************************************************************************
+
 PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
 {
     int     i_Dialog_Width       = 600;
@@ -29,7 +31,8 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
     int     i_CodecDownload      = _UTF8_;
     int		i_minWidth			 = 8*fontMetrics().width( 'w' ) + 2;
 
-    QString s_Version            = "PanGet V3.2";
+    QString s_Version            = "PanGet V4.0";
+    QString s_Query              = "";
     QString s_IDListFile		 = "";
     QString s_DownloadDirectory	 = "";
 
@@ -43,48 +46,58 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
     connect( HelpButton, SIGNAL( clicked() ), this, SLOT( displayHelp() ) );
     connect( browseIDListFileButton, SIGNAL( clicked() ), this, SLOT( browseIDListFileDialog() ) );
     connect( browseDownloadDirectoryButton, SIGNAL( clicked() ), this, SLOT( browseDownloadDirectoryDialog() ) );
+    connect( QueryLineEdit, SIGNAL( textChanged( QString ) ), this, SLOT( enableBuildButton() ) );
     connect( IDListFileLineEdit, SIGNAL( textChanged( QString ) ), this, SLOT( enableBuildButton() ) );
     connect( DownloadDirectoryLineEdit, SIGNAL( textChanged( QString ) ), this, SLOT( enableBuildButton() ) );
+    connect( ClearPushButton, SIGNAL( clicked() ), this, SLOT( clear() ) );
 
     s_Version = getVersion();
 
 // **********************************************************************************************
 
-    loadPreferences( gi_NumOfProgramStarts, i_Dialog_X, i_Dialog_Y, i_Dialog_Width, s_IDListFile, s_DownloadDirectory, i_CodecDownload );
+    loadPreferences( gi_NumOfProgramStarts, i_Dialog_X, i_Dialog_Y, i_Dialog_Width, s_Query, s_IDListFile, s_DownloadDirectory, i_CodecDownload );
 
     this->move( i_Dialog_X, i_Dialog_Y );
     this->resize( i_Dialog_Width, 250 );
 
     if ( gi_NumOfProgramStarts++ < 1 )
-        savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_IDListFile, s_DownloadDirectory, i_CodecDownload );
+        savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, i_CodecDownload );
 
 // **********************************************************************************************
 
     CodecDownload_ComboBox->setCurrentIndex( i_CodecDownload );
 
 // **********************************************************************************************
+// set PANGAEA Query
 
-    QFileInfo fi( s_IDListFile );
-
-    if ( ( fi.isFile() == false ) || ( fi.exists() == false ) )
-        IDListFileLineEdit->clear();
-    else
-        IDListFileLineEdit->setText( QDir::toNativeSeparators( s_IDListFile ) );
+    if ( s_Query.toLower().startsWith( "https://pangaea.de/?q" ) == true )
+        QueryLineEdit->setText( s_Query );
 
 // **********************************************************************************************
+// set ID File
 
-    QFileInfo di( s_DownloadDirectory );
-
-    if ( ( di.isDir() == true ) && ( di.exists() == true ) )
+    if ( s_IDListFile.isEmpty() == false )
     {
-        if ( s_DownloadDirectory.endsWith( QDir::toNativeSeparators( "/" ) ) == true )
-            s_DownloadDirectory = s_DownloadDirectory.remove( s_DownloadDirectory.length()-1, 1 );
+        QFileInfo fi( s_IDListFile );
 
-        this->DownloadDirectoryLineEdit->setText( QDir::toNativeSeparators( s_DownloadDirectory ) );
+        if ( ( fi.isFile() == true ) && ( fi.exists() == true ) )
+            IDListFileLineEdit->setText( QDir::toNativeSeparators( s_IDListFile ) );
     }
-    else
+
+// **********************************************************************************************
+// set Download directory
+
+    if ( s_DownloadDirectory.isEmpty() == false )
     {
-        this->DownloadDirectoryLineEdit->clear();
+        QFileInfo di( s_DownloadDirectory );
+
+        if ( ( di.isDir() == true ) && ( di.exists() == true ) )
+        {
+            if ( s_DownloadDirectory.endsWith( QDir::toNativeSeparators( "/" ) ) == true )
+                s_DownloadDirectory = s_DownloadDirectory.remove( s_DownloadDirectory.length()-1, 1 );
+
+            this->DownloadDirectoryLineEdit->setText( QDir::toNativeSeparators( s_DownloadDirectory ) );
+        }
     }
 
 // **********************************************************************************************
@@ -103,9 +116,11 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
 
 void PanGetDialog::getDatasets()
 {
-    int i       							= 0;
-    int n                                   = 0;
     int err                                 = _NOERROR_;
+
+    int i       							= 0;
+    int i_NumOfQueries                      = 0;
+    int i_NumOfDatasetIDs                   = 0;
 
     int	i_stopProgress						= 0;
     int	i_NumOfParents						= 0;
@@ -115,8 +130,9 @@ void PanGetDialog::getDatasets()
     int i_Extension                         = _TXT_;
     int i_CodecDownload                     = CodecDownload_ComboBox->currentIndex();
 
-    QString s_IDListFile					= IDListFileLineEdit->text();
     QString s_DownloadDirectory				= DownloadDirectoryLineEdit->text();
+    QString s_Query                         = QueryLineEdit->text();
+    QString s_IDListFile					= IDListFileLineEdit->text();
 
     QString s_Message						= "";
     QString s_DatasetID						= "";
@@ -124,13 +140,16 @@ void PanGetDialog::getDatasets()
     QString s_Domain                        = "";
     QString s_ExportFilename				= "";
     QString s_Url							= "";
-    QString s_Size							= "";
     QString s_EOL                           = "\n"; // CR+LF if compiled on Windows!
     QString s_Curl                          = "";
+    QString s_tempFile                      = "";
 
-    QStringList	sl_Input;
+    QString s_PathDir                       = "";
+    QString s_PathFile                      = "";
+
+    QStringList	sl_Queries;
+    QStringList sl_DatasetIDs;
     QStringList sl_Data;
-    QStringList sl_Result;
 
     bool	b_ExportFilenameExists			= false;
     bool	b_isURL             			= false;
@@ -147,25 +166,48 @@ void PanGetDialog::getDatasets()
         DownloadDirectoryLineEdit->setText( QDir::toNativeSeparators( s_DownloadDirectory ) );
     }
 
-    savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_IDListFile, s_DownloadDirectory, i_CodecDownload );
+    savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, i_CodecDownload );
 
 // **********************************************************************************************
 // read ID list
 
-    if ( ( n = readFile( s_IDListFile, sl_Input, _SYSTEM_ ) ) < 1 ) // System encoding
+    s_Curl = findCurl();
+
+    if ( s_Query.isEmpty() == false )
+    {
+        s_tempFile = s_DownloadDirectory + "/" + "Query_result_json.txt";
+        s_Url      = "https://www.pangaea.de/advanced/search.php?" + s_Query.section( "/?", 1, 1 );
+
+        if ( s_Url.contains( "&count=" ) == false )
+            s_Url.append( "&count=500" );
+
+        downloadFile( s_Curl, s_Url, s_tempFile );
+
+        i_NumOfQueries = readFile( s_tempFile, sl_Queries, _SYSTEM_ ); // System encoding
+
+        removeFile( s_tempFile );
+    }
+
+    if( s_IDListFile.isEmpty() == false )
+        i_NumOfDatasetIDs = readFile( s_IDListFile, sl_DatasetIDs, _SYSTEM_ ); // System encoding
+
+    if ( i_NumOfQueries + i_NumOfDatasetIDs < 1 )
         return;
 
 // **********************************************************************************************
+// create log file
 
     QFileInfo fidd( s_DownloadDirectory );
     QFileInfo fifailed( s_IDListFile );
 
-    QString pathdir  = fidd.absoluteFilePath();
-    QString pathfile = fifailed.absolutePath();
+    s_PathDir = fidd.absoluteFilePath();
+
+    if ( s_IDListFile.isEmpty() == false )
+        s_PathFile = fifailed.absolutePath();
 
     QFile fout;
 
-    if ( pathdir != pathfile )
+    if ( s_PathDir != s_PathFile )
         fout.setFileName( fidd.absoluteFilePath().section( "/", 0, fidd.absoluteFilePath().count( "/" )-1 ) + "/" + fidd.absoluteFilePath().section( "/", -1, -1 ) + "_failed.txt" );
     else
         fout.setFileName( fifailed.absolutePath() + "/" + fifailed.completeBaseName() + "_failed.txt" );
@@ -190,73 +232,59 @@ void PanGetDialog::getDatasets()
         break;
     }
 
-    s_Curl = findCurl();
-
 // **********************************************************************************************
 
     if ( b_isURL == true )
         tout << "URL\tfile name\tComment" << endl;
     else
-        tout << "*ID\tComment" << endl;
+        tout << "Comment" << endl;
 
 // **********************************************************************************************
 // Read data and build dataset list
 
-    if ( ( sl_Input.at( 0 ).startsWith( "<html>", Qt::CaseInsensitive ) == true ) || ( sl_Input.at( 0 ).startsWith( "<!doctype html", Qt::CaseInsensitive ) == true ) || ( sl_Input.at( 0 ).startsWith( "PANGAEA Home </>" ) == true ) )
+    if ( sl_Queries.count() > 0 )
     {
-        while ( i < sl_Input.count() )
+        if ( ( sl_Queries.at( 0 ).startsWith( "{" ) == true ) && ( sl_Queries.at( 0 ).endsWith( "}" ) == true )  )
         {
-            if ( sl_Input.at( i ).contains( "<!--RESULT ITEM START-->" ) == true )
+            QStringList sl_URIs;
+
+            QJsonDocument jsonResponse = QJsonDocument::fromJson( sl_Queries.join( "" ).toUtf8());
+            QJsonObject   jsonObject   = jsonResponse.object();
+            QJsonArray    jsonArray    = jsonObject[ "results" ].toArray();
+
+            foreach ( const QJsonValue & value, jsonArray )
             {
-                while ( ( sl_Input.at( i ).contains( "/PANGAEA." ) == false ) && ( i < sl_Input.count() ) )
-                    i++;
-
-                s_Data = sl_Input.at( i ).section( "/PANGAEA.", 1, 1 ).section( "\"", 0, 0 );
-
-                while ( ( sl_Input.at( i ).toLower().contains( "size:</td>" ) == false ) && ( i < sl_Input.count() ) )
-                    i++;
-
-                if ( ++i < sl_Input.count() )
-                    s_Size = sl_Input.at( i );
-
-                if ( s_Size.toLower().contains( "data points</td>" ) == true )
-                    sl_Data.append( s_Data );
-
-                if ( s_Size.toLower().contains( "unknown</td>" ) == true )
-                    sl_Data.append( s_Data );
-
-                if ( s_Size.toLower().contains( "datasets</td>" ) == true )
-                {
-                    tout << s_Data << "\t\t" << "Dataset is a parent" << endl;
-                    i_NumOfParents++;
-                }
+                QJsonObject obj = value.toObject();
+                sl_URIs.append( obj[ "URI" ].toString() );
             }
 
-            ++i;
+            for ( int i=0; i<sl_URIs.count(); i++ )
+                sl_Data.append( sl_URIs.at( i ).section( "PANGAEA.", 1, 1 ) );
         }
     }
-    else
+
+    if ( sl_DatasetIDs.count() > 0 )
     {
-        sl_Input.removeDuplicates();
+        sl_DatasetIDs.removeDuplicates();
 
-        if ( sl_Input.at( 0 ).section( "\t", 0, 0 ).toLower() == "url" )
+        if ( sl_DatasetIDs.at( 0 ).section( "\t", 0, 0 ).toLower() == "url" )
             b_isURL = true;
 
-        if ( sl_Input.at( 0 ).section( "\t", 0, 0 ).toLower() == "uri" )
+        if ( sl_DatasetIDs.at( 0 ).section( "\t", 0, 0 ).toLower() == "uri" )
             b_isURL = true;
 
-        if ( sl_Input.at( 0 ).section( "\t", 1, 1 ).toLower() == "filename" )
+        if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower() == "filename" )
             b_ExportFilenameExists = true;
 
-        if ( sl_Input.at( 0 ).section( "\t", 1, 1 ).toLower() == "file name" )
+        if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower() == "file name" )
             b_ExportFilenameExists = true;
 
-        if ( sl_Input.at( 0 ).section( "\t", 1, 1 ).toLower() == "file" )
+        if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower() == "file" )
             b_ExportFilenameExists = true;
 
-        while ( ++i < sl_Input.count() )
+        while ( ++i < sl_DatasetIDs.count() )
         {
-            s_Data = sl_Input.at( i );
+            s_Data = sl_DatasetIDs.at( i );
             s_Data.replace( " ", "" );
 
             if ( s_Data.isEmpty() == false )
@@ -268,7 +296,7 @@ void PanGetDialog::getDatasets()
 
     i_totalNumOfDownloads = sl_Data.count();
 
-    if ( i_totalNumOfDownloads <= 0 )
+    if ( i_totalNumOfDownloads < 1 )
     {
         s_Message = tr( "No datasets downloaded. See\n\n" ) + QDir::toNativeSeparators( fout.fileName() ) + tr( "\n\nfor details." );
         QMessageBox::information( this, getApplicationName( true ), s_Message );
@@ -386,45 +414,41 @@ void PanGetDialog::getDatasets()
 
                     downloadFile( s_Curl, s_Url, s_ExportFilename );
 
-                    QFileInfo fd( s_ExportFilename );
-
-                    if ( fd.size() == 0 )
+                    switch( checkFile( s_ExportFilename, false ) )
                     {
-                        i_removedDatasets++;
+                    case -10:
+                        tout << "Data set " << s_DatasetID << " is login required or static URL" << s_EOL;
                         removeFile( s_ExportFilename );
-                        tout << s_DatasetID << "\t" << "login required or data set is a parent or static URL" << s_EOL;
-                    }
-                    else
-                    {
-                        if ( ( ( s_ExportFilename.toLower().endsWith( ".txt" ) == true ) || ( s_ExportFilename.toLower().endsWith( ".csv" ) == true ) ) && ( readFile( s_ExportFilename, sl_Input, _SYSTEM_, 8000 ) > 0 ) )
-                        {
-                            if ( sl_Input.at( 0 ).startsWith( "/* DATA DESCRIPTION:" ) == false  )
-                            {
-                                removeFile( s_ExportFilename );
-
-                                i_removedDatasets++;
-
-                                sl_Result = sl_Input.filter( "was substituted by an other version at" );
-
-                                if ( sl_Result.count() > 0 )
-                                    tout << "\t" << "Dataset " <<  s_DatasetID << " was substituted by an other version." << s_EOL;
-
-                                sl_Result = sl_Input.filter( "No data available!" );
-
-                                if ( sl_Result.count() > 0 )
-                                    tout << "\t" << "Something wrong, no data available for dataset " << s_DatasetID << ". Please ask Rainer Sieger (rsieger@pangaea.de)" << s_EOL;
-
-                                sl_Result = sl_Input.filter( "A data set identified by" );
-
-                                if ( sl_Result.count() > 0 )
-                                    tout << "\t" << "Dataset " <<  s_DatasetID << " not exist!" << s_EOL;
-
-                                sl_Result = sl_Input.filter( "The dataset is currently not available for download. Try again later!" );
-
-                                if ( sl_Result.count() > 0 )
-                                    tout << s_DatasetID << "\t" << "Dataset not available at this time. Please try again later." << s_EOL;
-                            }
-                        }
+                        i_removedDatasets++;
+                        break;
+                    case -20:
+                        tout << "Data set " <<  s_DatasetID << " was substituted by an other version." << s_EOL;
+                        removeFile( s_ExportFilename );
+                        i_removedDatasets++;
+                        break;
+                    case -30:
+                        tout << "Data set " <<  s_DatasetID << " data set is a parent." << s_EOL;
+                        removeFile( s_ExportFilename );
+                        i_removedDatasets++;
+                        i_NumOfParents++;
+                        break;
+                    case -40:
+                        tout << "Something wrong, no data available for dataset " << s_DatasetID << ". Please ask Rainer Sieger (rsieger@pangaea.de)" << s_EOL;
+                        removeFile( s_ExportFilename );
+                        i_removedDatasets++;
+                        break;
+                    case -50:
+                        tout << "Data set " <<  s_DatasetID << " not exist!" << s_EOL;
+                        removeFile( s_ExportFilename );
+                        i_removedDatasets++;
+                        break;
+                    case -60:
+                        tout << "Data set " << s_DatasetID << " not available at this time. Please try again later." << s_EOL;
+                        removeFile( s_ExportFilename );
+                        i_removedDatasets++;
+                        break;
+                    default:
+                        break;
                     }
                 }
                 else
@@ -433,13 +457,15 @@ void PanGetDialog::getDatasets()
 
                     downloadFile( s_Curl, s_Url, s_ExportFilename );
 
-                    QFileInfo fd( s_ExportFilename );
-
-                    if ( fd.size() == 0 )
+                    switch( checkFile( s_ExportFilename, true ) )
                     {
-                        i_removedDatasets++;
-                        removeFile( s_ExportFilename );
+                    case -10:
                         tout << s_Url << "\t" << QDir::toNativeSeparators( s_ExportFilename ) << "\t" << "login required or file not found" << s_EOL;
+                        removeFile( s_ExportFilename );
+                        i_removedDatasets++;
+                        break;
+                    default:
+                        break;
                     }
                 }
 
@@ -507,6 +533,62 @@ void PanGetDialog::getDatasets()
 // **********************************************************************************************
 
     return;
+}
+
+// **********************************************************************************************
+// **********************************************************************************************
+// **********************************************************************************************
+
+int PanGetDialog::checkFile( const QString &s_Filename, const bool isbinary )
+{
+    QStringList sl_Input;
+    QStringList sl_Result;
+
+    QFileInfo   fd( s_Filename );
+
+// **********************************************************************************************
+
+    if ( fd.size() == 0 )
+        return( -10 );
+
+    if ( isbinary == true )
+        return( 0 );
+
+    if ( ( s_Filename.toLower().endsWith( ".txt" ) == true ) || ( s_Filename.toLower().endsWith( ".csv" ) == true ) )
+    {
+        if ( readFile( s_Filename, sl_Input, _SYSTEM_, 8000 ) > 0 )
+        {
+            if ( sl_Input.at( 0 ).startsWith( "/* DATA DESCRIPTION:" ) == false  )
+            {
+                sl_Result = sl_Input.filter( "was substituted by an other version at" );
+
+                if ( sl_Result.count() > 0 )
+                    return( -20 );
+
+                sl_Result = sl_Input.filter( "TEXTFILE format is not available for collection data sets!" );
+
+                if ( sl_Result.count() > 0 )
+                    return( -30 );
+
+                sl_Result = sl_Input.filter( "No data available!" );
+
+                if ( sl_Result.count() > 0 )
+                    return( -40 );
+
+                sl_Result = sl_Input.filter( "A data set identified by" );
+
+                if ( sl_Result.count() > 0 )
+                    return( -50 );
+
+                sl_Result = sl_Input.filter( "The dataset is currently not available for download. Try again later!" );
+
+                if ( sl_Result.count() > 0 )
+                    return( -60 );
+            }
+        }
+    }
+
+    return( _NOERROR_ );
 }
 
 // **********************************************************************************************
@@ -595,7 +677,7 @@ QString PanGetDialog::getPreferenceFilename()
 // **********************************************************************************************
 // 19.4.2003
 
-void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_Dialog_X, const int i_Dialog_Y, const int i_Dialog_Width, const QString &s_IDListFile, const QString &s_DownloadDirectory, const int i_CodecDownload )
+void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_Dialog_X, const int i_Dialog_Y, const int i_Dialog_Width, const QString &s_Query, const QString &s_IDListFile, const QString &s_DownloadDirectory, const int i_CodecDownload )
 {
     #if defined(Q_OS_LINUX)
         QSettings settings( getPreferenceFilename(), QSettings::IniFormat );
@@ -616,8 +698,9 @@ void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_
     settings.setValue( "DialogY", i_Dialog_Y );
     settings.setValue( "DialogWidth", i_Dialog_Width );
 
-    settings.setValue( "IDListFile", s_IDListFile );
     settings.setValue( "DownloadDirectory", s_DownloadDirectory );
+    settings.setValue( "Query", s_Query );
+    settings.setValue( "IDListFile", s_IDListFile );
     settings.setValue( "CodecDownload", i_CodecDownload );
     settings.endGroup();
 }
@@ -627,7 +710,7 @@ void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_
 // **********************************************************************************************
 // 10.03.2007
 
-void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, int &i_Dialog_Y, int &i_Dialog_Width, QString &s_IDListFile, QString &s_DownloadDirectory, int &i_CodecDownload )
+void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, int &i_Dialog_Y, int &i_Dialog_Width, QString &s_Query, QString &s_IDListFile, QString &s_DownloadDirectory, int &i_CodecDownload )
 {
     #if defined(Q_OS_LINUX)
         QSettings settings( getPreferenceFilename(), QSettings::IniFormat );
@@ -648,8 +731,9 @@ void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, 
     i_Dialog_Y           = settings.value( "DialogY", 100 ).toInt();
     i_Dialog_Width       = settings.value( "DialogWidth", 600 ).toInt();
 
-    s_IDListFile         = settings.value( "IDListFile" ).toString();
     s_DownloadDirectory  = settings.value( "DownloadDirectory" ).toString();
+    s_Query              = settings.value( "Query" ).toString();
+    s_IDListFile         = settings.value( "IDListFile" ).toString();
     i_CodecDownload      = settings.value( "CodecDownload", 0 ).toInt();
     settings.endGroup();
 }
@@ -664,7 +748,7 @@ void PanGetDialog::enableBuildButton()
 
     QFileInfo fi( IDListFileLineEdit->text() );
 
-    if ( ( fi.isFile() == false ) || ( fi.exists() == false ) )
+    if ( ( ( fi.isFile() == false ) || ( fi.exists() == false ) ) && ( QueryLineEdit->text().toLower().startsWith( "https://pangaea.de/?q" ) == false ) )
         b_OK = false;
 
     QFileInfo di( DownloadDirectoryLineEdit->text() );
@@ -769,7 +853,7 @@ int PanGetDialog::downloadFile( const QString &s_Curl, const QString &s_Url, con
 
     removeFile( s_Filename );
 
-    process.start( "\"" + QDir::toNativeSeparators( s_Curl ) + "\" -o \"" + QDir::toNativeSeparators( s_Filename ) + "\"" + " " + s_Url );
+    process.start( "\"" + QDir::toNativeSeparators( s_Curl ) + "\" -o \"" + QDir::toNativeSeparators( s_Filename ) + "\" \"" + s_Url + "\"" );
     process.waitForFinished( -1 );
 
     return( _NOERROR_ );
@@ -843,6 +927,19 @@ void PanGetDialog::browseIDListFileDialog()
 // **********************************************************************************************
 // **********************************************************************************************
 
+void PanGetDialog::clear()
+{
+    QueryLineEdit->clear();
+    IDListFileLineEdit->clear();
+    DownloadDirectoryLineEdit->clear();
+
+    enableBuildButton();
+}
+
+// **********************************************************************************************
+// **********************************************************************************************
+// **********************************************************************************************
+
 void PanGetDialog::browseDownloadDirectoryDialog()
 {
     QString fp	= "";
@@ -897,7 +994,7 @@ void PanGetDialog::dropEvent( QDropEvent *event )
 
     if ( fi.isFile() == true )
     {
-        if ( ( fi.suffix().toLower() == "txt" ) || ( fi.suffix().toLower() == "html" )  || ( fi.suffix().toLower() == "htm" ) )
+        if ( ( fi.suffix().toLower() == "txt" ) || ( fi.suffix().toLower() == "csv" ) )
             IDListFileLineEdit->setText( QDir::toNativeSeparators( s_fileName ) );
     }
     else
