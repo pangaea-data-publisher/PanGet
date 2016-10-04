@@ -20,6 +20,9 @@ const int   _LATIN1_                 = 2;    // Latin-1 = ISO 8859-1
 const int   _TXT_                    = 0;
 const int   _CSV_                    = 1;
 
+const int   _UNIX_                   = 0;
+const int   _WIN_                    = 1;
+
 // **********************************************************************************************
 
 PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
@@ -28,7 +31,6 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
     int     i_Dialog_X           = 10;
     int     i_Dialog_Y           = 10;
 
-    int     i_CodecDownload      = _UTF8_;
     int		i_minWidth			 = 8*fontMetrics().width( 'w' ) + 2;
 
     QString s_Version            = "PanGet V4.0";
@@ -36,34 +38,59 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
     QString s_IDListFile		 = "";
     QString s_DownloadDirectory	 = "";
 
+    bool    b_DownloadData       = true;
+    bool    b_DownloadCitation   = false;
+    bool    b_DownloadMetadata   = false;
+    int     i_CodecDownload      = _UTF8_;
+    int     i_EOL                = _UNIX_;
+    int     i_Extension          = _TXT_;
+
+    #if defined(Q_OS_LINUX)
+        i_CodecDownload          = _UTF8_;
+        i_EOL                    = _UNIX_;
+    #endif
+
+    #if defined(Q_OS_MAC)
+        i_CodecDownload          = _APPLEROMAN_;
+        i_EOL                    = _UNIX_;
+    #endif
+
+    #if defined(Q_OS_WIN)
+        i_CodecDownload          = _LATIN1_;
+        i_EOL                    = _WIN_;
+    #endif
+
+
 // **********************************************************************************************
 // Dialog
 
     setupUi( this );
 
-    connect( GetDatasetsButton, SIGNAL( clicked() ), this, SLOT( getDatasets() ) );
-    connect( QuitButton, SIGNAL( clicked() ), this, SLOT( reject() ) );
-    connect( HelpButton, SIGNAL( clicked() ), this, SLOT( displayHelp() ) );
-    connect( browseIDListFileButton, SIGNAL( clicked() ), this, SLOT( browseIDListFileDialog() ) );
-    connect( browseDownloadDirectoryButton, SIGNAL( clicked() ), this, SLOT( browseDownloadDirectoryDialog() ) );
+    connect( GetDatasets_pushButton, SIGNAL( clicked() ), this, SLOT( getDatasets() ) );
+    connect( Quit_pushButton, SIGNAL( clicked() ), this, SLOT( reject() ) );
+    connect( Help_pushButton, SIGNAL( clicked() ), this, SLOT( displayHelp() ) );
+    connect( browseIDListFile_pushButton, SIGNAL( clicked() ), this, SLOT( browseIDListFileDialog() ) );
+    connect( browseDownloadDirectory_pushButton, SIGNAL( clicked() ), this, SLOT( browseDownloadDirectoryDialog() ) );
     connect( QueryLineEdit, SIGNAL( textChanged( QString ) ), this, SLOT( enableBuildButton() ) );
     connect( IDListFileLineEdit, SIGNAL( textChanged( QString ) ), this, SLOT( enableBuildButton() ) );
     connect( DownloadDirectoryLineEdit, SIGNAL( textChanged( QString ) ), this, SLOT( enableBuildButton() ) );
-    connect( ClearPushButton, SIGNAL( clicked() ), this, SLOT( clear() ) );
+    connect( Clear_pushButton, SIGNAL( clicked() ), this, SLOT( clear() ) );
 
     s_Version = getVersion();
 
 // **********************************************************************************************
+// load preferences
 
-    loadPreferences( gi_NumOfProgramStarts, i_Dialog_X, i_Dialog_Y, i_Dialog_Width, s_Query, s_IDListFile, s_DownloadDirectory, i_CodecDownload );
+    loadPreferences( gi_NumOfProgramStarts, i_Dialog_X, i_Dialog_Y, i_Dialog_Width, s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_EOL, i_Extension );
 
     this->move( i_Dialog_X, i_Dialog_Y );
     this->resize( i_Dialog_Width, 250 );
 
     if ( gi_NumOfProgramStarts++ < 1 )
-        savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, i_CodecDownload );
+        savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_EOL, i_Extension );
 
 // **********************************************************************************************
+// set Codec
 
     CodecDownload_ComboBox->setCurrentIndex( i_CodecDownload );
 
@@ -96,7 +123,7 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
             if ( s_DownloadDirectory.endsWith( QDir::toNativeSeparators( "/" ) ) == true )
                 s_DownloadDirectory = s_DownloadDirectory.remove( s_DownloadDirectory.length()-1, 1 );
 
-            this->DownloadDirectoryLineEdit->setText( QDir::toNativeSeparators( s_DownloadDirectory ) );
+            DownloadDirectoryLineEdit->setText( QDir::toNativeSeparators( s_DownloadDirectory ) );
         }
     }
 
@@ -107,7 +134,7 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
 
     enableBuildButton();
 
-    GetDatasetsButton->setFocus();
+    GetDatasets_pushButton->setFocus();
 }
 
 // **********************************************************************************************
@@ -116,31 +143,25 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
 
 void PanGetDialog::getDatasets()
 {
-    int err                                 = _NOERROR_;
+    int err                     = _NOERROR_;
 
-    int i       							= 0;
-    int i_NumOfQueries                      = 0;
-    int i_NumOfDatasetIDs                   = 0;
+    int i       				= 0;
+    int i_NumOfQueries          = 0;
+    int i_NumOfDatasetIDs       = 0;
 
-    int	i_stopProgress						= 0;
-    int	i_NumOfParents						= 0;
-    int i_totalNumOfDownloads				= 0;
-    int i_removedDatasets					= 0;
+    int	i_stopProgress			= 0;
+    int	i_NumOfParents			= 0;
+    int i_totalNumOfDownloads	= 0;
+    int i_removedDatasets		= 0;
 
-    int i_Extension                         = _TXT_;
-    int i_CodecDownload                     = CodecDownload_ComboBox->currentIndex();
-
-    QString s_DownloadDirectory				= DownloadDirectoryLineEdit->text();
-    QString s_Query                         = QueryLineEdit->text();
-    QString s_IDListFile					= IDListFileLineEdit->text();
+    QString s_EOL                           = "\n"; // CR+LF if compiled on Windows!
 
     QString s_Message						= "";
     QString s_DatasetID						= "";
     QString	s_Data							= "";
     QString s_Domain                        = "";
-    QString s_ExportFilename				= "";
+    QString s_Filename				        = "";
     QString s_Url							= "";
-    QString s_EOL                           = "\n"; // CR+LF if compiled on Windows!
     QString s_Curl                          = "";
     QString s_tempFile                      = "";
 
@@ -151,12 +172,20 @@ void PanGetDialog::getDatasets()
     QStringList sl_DatasetIDs;
     QStringList sl_Data;
 
-    bool	b_ExportFilenameExists			= false;
+    bool	b_ExportFileExists  			= false;
     bool	b_isURL             			= false;
+
+    int i_Extension                         = _TXT_;
 
     bool    b_DownloadCitation              = false;
     bool    b_DownloadMetadata              = false;
     bool    b_DownloadData                  = true;
+
+    int     i_CodecDownload                 = CodecDownload_ComboBox->currentIndex();
+
+    QString s_DownloadDirectory				= DownloadDirectoryLineEdit->text();
+    QString s_Query                         = QueryLineEdit->text();
+    QString s_IDListFile					= IDListFileLineEdit->text();
 
 // **********************************************************************************************
 
@@ -166,7 +195,7 @@ void PanGetDialog::getDatasets()
         DownloadDirectoryLineEdit->setText( QDir::toNativeSeparators( s_DownloadDirectory ) );
     }
 
-    savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, i_CodecDownload );
+    savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_EOL, i_Extension );
 
 // **********************************************************************************************
 // read ID list
@@ -188,7 +217,7 @@ void PanGetDialog::getDatasets()
         removeFile( s_tempFile );
     }
 
-    if( s_IDListFile.isEmpty() == false )
+    if ( s_IDListFile.isEmpty() == false )
         i_NumOfDatasetIDs = readFile( s_IDListFile, sl_DatasetIDs, _SYSTEM_ ); // System encoding
 
     if ( i_NumOfQueries + i_NumOfDatasetIDs < 1 )
@@ -274,13 +303,13 @@ void PanGetDialog::getDatasets()
             b_isURL = true;
 
         if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower() == "filename" )
-            b_ExportFilenameExists = true;
+            b_ExportFileExists = true;
 
         if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower() == "file name" )
-            b_ExportFilenameExists = true;
+            b_ExportFileExists = true;
 
         if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower() == "file" )
-            b_ExportFilenameExists = true;
+            b_ExportFileExists = true;
 
         while ( ++i < sl_DatasetIDs.count() )
         {
@@ -306,7 +335,7 @@ void PanGetDialog::getDatasets()
 // **********************************************************************************************
 // Download
 
-    initFileProgress( i_totalNumOfDownloads, "", tr( "Downloading datasets..." ) );
+    initFileProgress( i_totalNumOfDownloads, "", tr( "Downloading data sets..." ) );
 
     i = 0;
 
@@ -333,31 +362,31 @@ void PanGetDialog::getDatasets()
             s_DatasetID.replace( tr( ", doi registration in progress" ), tr( "" ) );
         }
 
-        if ( b_ExportFilenameExists == true )
+        if ( b_ExportFileExists == true )
         {
-            s_ExportFilename = sl_Data.at( i ).section( "\t", 1, 1 );
-            s_ExportFilename.replace( " ", "_" );
+            s_Filename = sl_Data.at( i ).section( "\t", 1, 1 );
+            s_Filename.replace( " ", "_" );
 
-            if ( s_ExportFilename.isEmpty() == true )
+            if ( s_Filename.isEmpty() == true )
             {
                 if ( b_isURL == true )
-                    s_ExportFilename = sl_Data.at( i ).section( "\t", 0, 0 ).section( "/", -1, -1 );
+                    s_Filename = sl_Data.at( i ).section( "\t", 0, 0 ).section( "/", -1, -1 );
                 else
-                    s_ExportFilename = tr( "not_given" );
+                    s_Filename = tr( "not_given" );
             }
 
             if ( b_isURL == false )
             {
-                s_ExportFilename.append( tr( "~" ) );
-                s_ExportFilename.append( s_DatasetID );
+                s_Filename.append( tr( "~" ) );
+                s_Filename.append( s_DatasetID );
             }
         }
         else
         {
             if ( b_isURL == true )
-                s_ExportFilename = sl_Data.at( i ).section( "\t", 0, 0 ).section( "/", -1, -1 );
+                s_Filename = sl_Data.at( i ).section( "\t", 0, 0 ).section( "/", -1, -1 );
             else
-                s_ExportFilename.sprintf( "%06d", s_DatasetID.toInt() );
+                s_Filename.sprintf( "%06d", s_DatasetID.toInt() );
         }
 
         if ( ( b_DownloadCitation == true ) && ( b_isURL == false ) )
@@ -365,9 +394,9 @@ void PanGetDialog::getDatasets()
             s_Url = s_Domain + "/10.1594/PANGAEA."+ s_DatasetID + "?format=citation_text";
 
             if ( sl_Data.at( i ).section( "\t", 1, 1 ) == "parent" )
-                downloadFile( s_Curl, s_Url, s_DownloadDirectory + "/" + "is_parent_" + s_ExportFilename + "_citation" + setExtension( i_Extension ) );
+                downloadFile( s_Curl, s_Url, s_DownloadDirectory + "/" + "is_parent_" + s_Filename + "_citation" + setExtension( i_Extension ) );
             else
-                downloadFile( s_Curl, s_Url, s_DownloadDirectory + "/" + s_ExportFilename + "_citation" + setExtension( i_Extension ) );
+                downloadFile( s_Curl, s_Url, s_DownloadDirectory + "/" + s_Filename + "_citation" + setExtension( i_Extension ) );
 
             wait( 100 );
         }
@@ -377,9 +406,9 @@ void PanGetDialog::getDatasets()
             s_Url = s_Domain + "/10.1594/PANGAEA."+ s_DatasetID + "?format=metainfo_xml";
 
             if ( sl_Data.at( i ).section( "\t", 1, 1 ) == "parent" )
-                downloadFile( s_Curl, s_Url, s_DownloadDirectory + "/" + "is_parent_" + s_ExportFilename + "_metadata.xml" );
+                downloadFile( s_Curl, s_Url, s_DownloadDirectory + "/" + "is_parent_" + s_Filename + "_metadata.xml" );
             else
-                downloadFile( s_Curl, s_Url, s_DownloadDirectory + "/" + s_ExportFilename + "_metadata.xml" );
+                downloadFile( s_Curl, s_Url, s_DownloadDirectory + "/" + s_Filename + "_metadata.xml" );
 
             wait( 100 );
         }
@@ -388,13 +417,13 @@ void PanGetDialog::getDatasets()
         {
             if ( ( b_isURL == true ) || ( s_DatasetID.toInt() >= 50000 ) )
             {
-                s_ExportFilename = s_DownloadDirectory + "/" + s_ExportFilename;
+                s_Filename = s_DownloadDirectory + "/" + s_Filename;
 
                 if ( b_isURL == false )
                 {
-                    // dowload PANGAEA data sets
+                    // download PANGAEA data sets
 
-                    s_ExportFilename.append( setExtension( i_Extension ) );
+                    s_Filename.append( setExtension( i_Extension ) );
                     s_Url = s_Domain + "/10.1594/PANGAEA." + s_DatasetID + "?format=textfile";
 
                     switch ( i_CodecDownload )
@@ -412,39 +441,39 @@ void PanGetDialog::getDatasets()
                         break;
                     }
 
-                    downloadFile( s_Curl, s_Url, s_ExportFilename );
+                    downloadFile( s_Curl, s_Url, s_Filename );
 
-                    switch( checkFile( s_ExportFilename, false ) )
+                    switch( checkFile( s_Filename, false ) )
                     {
-                    case -10:
+                    case -10: // File size = 0 Byte
                         tout << "Data set " << s_DatasetID << " is login required or static URL" << s_EOL;
-                        removeFile( s_ExportFilename );
+                        removeFile( s_Filename );
                         i_removedDatasets++;
                         break;
                     case -20:
                         tout << "Data set " <<  s_DatasetID << " was substituted by an other version." << s_EOL;
-                        removeFile( s_ExportFilename );
+                        removeFile( s_Filename );
                         i_removedDatasets++;
                         break;
                     case -30:
                         tout << "Data set " <<  s_DatasetID << " data set is a parent." << s_EOL;
-                        removeFile( s_ExportFilename );
+                        removeFile( s_Filename );
                         i_removedDatasets++;
                         i_NumOfParents++;
                         break;
                     case -40:
                         tout << "Something wrong, no data available for dataset " << s_DatasetID << ". Please ask Rainer Sieger (rsieger@pangaea.de)" << s_EOL;
-                        removeFile( s_ExportFilename );
+                        removeFile( s_Filename );
                         i_removedDatasets++;
                         break;
                     case -50:
                         tout << "Data set " <<  s_DatasetID << " not exist!" << s_EOL;
-                        removeFile( s_ExportFilename );
+                        removeFile( s_Filename );
                         i_removedDatasets++;
                         break;
                     case -60:
                         tout << "Data set " << s_DatasetID << " not available at this time. Please try again later." << s_EOL;
-                        removeFile( s_ExportFilename );
+                        removeFile( s_Filename );
                         i_removedDatasets++;
                         break;
                     default:
@@ -453,15 +482,15 @@ void PanGetDialog::getDatasets()
                 }
                 else
                 {
-                    // dowload binary data with curl
+                    // download binary data with curl
 
-                    downloadFile( s_Curl, s_Url, s_ExportFilename );
+                    downloadFile( s_Curl, s_Url, s_Filename );
 
-                    switch( checkFile( s_ExportFilename, true ) )
+                    switch( checkFile( s_Filename, true ) )
                     {
-                    case -10:
-                        tout << s_Url << "\t" << QDir::toNativeSeparators( s_ExportFilename ) << "\t" << "login required or file not found" << s_EOL;
-                        removeFile( s_ExportFilename );
+                    case -10: // File size = 0 Byte
+                        tout << s_Url << "\t" << QDir::toNativeSeparators( s_Filename ) << "\t" << "login required or file not found" << s_EOL;
+                        removeFile( s_Filename );
                         i_removedDatasets++;
                         break;
                     default:
@@ -553,6 +582,8 @@ int PanGetDialog::checkFile( const QString &s_Filename, const bool isbinary )
 
     if ( isbinary == true )
         return( 0 );
+
+// **********************************************************************************************
 
     if ( ( s_Filename.toLower().endsWith( ".txt" ) == true ) || ( s_Filename.toLower().endsWith( ".csv" ) == true ) )
     {
@@ -677,7 +708,7 @@ QString PanGetDialog::getPreferenceFilename()
 // **********************************************************************************************
 // 19.4.2003
 
-void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_Dialog_X, const int i_Dialog_Y, const int i_Dialog_Width, const QString &s_Query, const QString &s_IDListFile, const QString &s_DownloadDirectory, const int i_CodecDownload )
+void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_Dialog_X, const int i_Dialog_Y, const int i_Dialog_Width, const QString &s_Query, const QString &s_IDListFile, const QString &s_DownloadDirectory, const bool b_DownloadData, const bool b_DownloadCitation, const bool b_DownloadMetadata, const int i_CodecDownload, const int i_EOL, const int i_Extension )
 {
     #if defined(Q_OS_LINUX)
         QSettings settings( getPreferenceFilename(), QSettings::IniFormat );
@@ -698,10 +729,15 @@ void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_
     settings.setValue( "DialogY", i_Dialog_Y );
     settings.setValue( "DialogWidth", i_Dialog_Width );
 
-    settings.setValue( "DownloadDirectory", s_DownloadDirectory );
     settings.setValue( "Query", s_Query );
     settings.setValue( "IDListFile", s_IDListFile );
+    settings.setValue( "DownloadDirectory", s_DownloadDirectory );
+    settings.setValue( "DownloadData", b_DownloadData );
+    settings.setValue( "DownloadCitation", b_DownloadCitation );
+    settings.setValue( "DownloadMetadata", b_DownloadMetadata );
     settings.setValue( "CodecDownload", i_CodecDownload );
+    settings.setValue( "EOL", i_EOL );
+    settings.setValue( "Extension", i_Extension );
     settings.endGroup();
 }
 
@@ -710,7 +746,7 @@ void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_
 // **********************************************************************************************
 // 10.03.2007
 
-void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, int &i_Dialog_Y, int &i_Dialog_Width, QString &s_Query, QString &s_IDListFile, QString &s_DownloadDirectory, int &i_CodecDownload )
+void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, int &i_Dialog_Y, int &i_Dialog_Width, QString &s_Query, QString &s_IDListFile, QString &s_DownloadDirectory, bool &b_DownloadData, bool &b_DownloadCitation, bool &b_DownloadMetadata, int &i_CodecDownload, int &i_EOL, int &i_Extension )
 {
     #if defined(Q_OS_LINUX)
         QSettings settings( getPreferenceFilename(), QSettings::IniFormat );
@@ -727,14 +763,19 @@ void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, 
     settings.beginGroup( QCoreApplication::applicationName() );
     i_NumOfProgramStarts = settings.value( "NumOfProgramStarts", 0 ).toInt();
 
-    i_Dialog_X           = settings.value( "DialogX", 100 ).toInt();
-    i_Dialog_Y           = settings.value( "DialogY", 100 ).toInt();
-    i_Dialog_Width       = settings.value( "DialogWidth", 600 ).toInt();
+    i_Dialog_X          = settings.value( "DialogX", 100 ).toInt();
+    i_Dialog_Y          = settings.value( "DialogY", 100 ).toInt();
+    i_Dialog_Width      = settings.value( "DialogWidth", 600 ).toInt();
 
-    s_DownloadDirectory  = settings.value( "DownloadDirectory" ).toString();
-    s_Query              = settings.value( "Query" ).toString();
-    s_IDListFile         = settings.value( "IDListFile" ).toString();
-    i_CodecDownload      = settings.value( "CodecDownload", 0 ).toInt();
+    s_Query             = settings.value( "Query", "" ).toString();
+    s_IDListFile        = settings.value( "IDListFile", "" ).toString();
+    s_DownloadDirectory = settings.value( "DownloadDirectory", "" ).toString();
+    b_DownloadData      = settings.value( "DownloadData", true ).toBool();
+    b_DownloadCitation  = settings.value( "DownloadCitation", false ).toBool();
+    b_DownloadMetadata  = settings.value( "DownloadMetadata", false ).toBool();
+    i_CodecDownload     = settings.value( "CodecDownload", 0 ).toInt();
+    i_EOL               = settings.value( "EOL", i_EOL ).toInt();
+    i_Extension         = settings.value( "Extension", _TXT_ ).toInt();
     settings.endGroup();
 }
 
@@ -758,13 +799,13 @@ void PanGetDialog::enableBuildButton()
 
     if ( b_OK == true )
     {
-        GetDatasetsButton->setEnabled( true );
-        GetDatasetsButton->setDefault( true );
+        GetDatasets_pushButton->setEnabled( true );
+        GetDatasets_pushButton->setDefault( true );
     }
     else
     {
-        GetDatasetsButton->setEnabled( false );
-        QuitButton->setDefault( true );
+        GetDatasets_pushButton->setEnabled( false );
+        GetDatasets_pushButton->setDefault( true );
     }
 }
 
@@ -927,19 +968,6 @@ void PanGetDialog::browseIDListFileDialog()
 // **********************************************************************************************
 // **********************************************************************************************
 
-void PanGetDialog::clear()
-{
-    QueryLineEdit->clear();
-    IDListFileLineEdit->clear();
-    DownloadDirectoryLineEdit->clear();
-
-    enableBuildButton();
-}
-
-// **********************************************************************************************
-// **********************************************************************************************
-// **********************************************************************************************
-
 void PanGetDialog::browseDownloadDirectoryDialog()
 {
     QString fp	= "";
@@ -962,6 +990,19 @@ void PanGetDialog::browseDownloadDirectoryDialog()
             DownloadDirectoryLineEdit->setText( QDir::toNativeSeparators( fp ) );
         }
     }
+}
+
+// **********************************************************************************************
+// **********************************************************************************************
+// **********************************************************************************************
+
+void PanGetDialog::clear()
+{
+    QueryLineEdit->clear();
+    IDListFileLineEdit->clear();
+    DownloadDirectoryLineEdit->clear();
+
+    enableBuildButton();
 }
 
 // **********************************************************************************************

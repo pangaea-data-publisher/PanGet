@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>661</width>
-    <height>288</height>
+    <height>363</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -17,8 +17,8 @@
   <property name="windowTitle">
    <string>PanGet</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0">
+  <layout class="QGridLayout" name="gridLayout_5">
+   <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="DownloadDirectoryGroupBox">
      <property name="title">
       <string/>
@@ -96,7 +96,7 @@
        </widget>
       </item>
       <item row="2" column="2">
-       <widget class="QPushButton" name="browseIDListFileButton">
+       <widget class="QPushButton" name="browseIDListFile_pushButton">
         <property name="text">
          <string>Br&amp;owse ...</string>
         </property>
@@ -135,7 +135,7 @@
        </widget>
       </item>
       <item row="3" column="2">
-       <widget class="QPushButton" name="browseDownloadDirectoryButton">
+       <widget class="QPushButton" name="browseDownloadDirectory_pushButton">
         <property name="text">
          <string>Bro&amp;wse ...</string>
         </property>
@@ -169,33 +169,73 @@
         </item>
        </widget>
       </item>
-      <item row="0" column="1">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="title">
+      <string>File extension of export filename</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0">
+       <widget class="QRadioButton" name="TXT_radioButton">
+        <property name="text">
+         <string>txt (Excel, tab delimited text)</string>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>365</width>
-          <height>20</height>
-         </size>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="CSV_radioButton">
+        <property name="text">
+         <string>csv (LibreOffice, character separated values)</string>
         </property>
-       </spacer>
+       </widget>
       </item>
      </layout>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="2" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Options</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="DownloadData_checkBox">
+        <property name="text">
+         <string>download data file</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="DownloadCitation_checkBox">
+        <property name="text">
+         <string>download citation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="DownloadMetadata_checkBox">
+        <property name="text">
+         <string>download metadata</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="HelpButton">
+      <widget class="QPushButton" name="Help_pushButton">
        <property name="text">
         <string>Help</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="ClearPushButton">
+      <widget class="QPushButton" name="Clear_pushButton">
        <property name="text">
         <string>Clear</string>
        </property>
@@ -215,7 +255,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="GetDatasetsButton">
+      <widget class="QPushButton" name="GetDatasets_pushButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -228,7 +268,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="QuitButton">
+      <widget class="QPushButton" name="Quit_pushButton">
        <property name="text">
         <string>&amp;Quit</string>
        </property>
@@ -244,14 +284,19 @@
  <tabstops>
   <tabstop>QueryLineEdit</tabstop>
   <tabstop>IDListFileLineEdit</tabstop>
-  <tabstop>browseIDListFileButton</tabstop>
+  <tabstop>browseIDListFile_pushButton</tabstop>
   <tabstop>DownloadDirectoryLineEdit</tabstop>
-  <tabstop>browseDownloadDirectoryButton</tabstop>
+  <tabstop>browseDownloadDirectory_pushButton</tabstop>
   <tabstop>CodecDownload_ComboBox</tabstop>
-  <tabstop>HelpButton</tabstop>
-  <tabstop>ClearPushButton</tabstop>
-  <tabstop>GetDatasetsButton</tabstop>
-  <tabstop>QuitButton</tabstop>
+  <tabstop>TXT_radioButton</tabstop>
+  <tabstop>CSV_radioButton</tabstop>
+  <tabstop>DownloadData_checkBox</tabstop>
+  <tabstop>DownloadCitation_checkBox</tabstop>
+  <tabstop>DownloadMetadata_checkBox</tabstop>
+  <tabstop>Help_pushButton</tabstop>
+  <tabstop>Clear_pushButton</tabstop>
+  <tabstop>GetDatasets_pushButton</tabstop>
+  <tabstop>Quit_pushButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>
