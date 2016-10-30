@@ -278,13 +278,6 @@ void PanGetDialog::getDatasets()
     }
 
 // **********************************************************************************************
-
-    if ( b_isURL == true )
-        tout << "URL\tfile name\tComment" << endl;
-    else
-        tout << "Comment" << endl;
-
-// **********************************************************************************************
 // Read data and build dataset list
 
     if ( sl_Queries.count() > 0 )
@@ -312,19 +305,16 @@ void PanGetDialog::getDatasets()
     {
         sl_DatasetIDs.removeDuplicates();
 
-        if ( sl_DatasetIDs.at( 0 ).section( "\t", 0, 0 ).toLower() == "url" )
+        if ( sl_DatasetIDs.at( 0 ).section( "\t", 0, 0 ).toLower().startsWith( "url" ) == true )
             b_isURL = true;
 
-        if ( sl_DatasetIDs.at( 0 ).section( "\t", 0, 0 ).toLower() == "uri" )
+        if ( sl_DatasetIDs.at( 0 ).section( "\t", 0, 0 ).toLower().startsWith( "uniform resource locator" ) == true )
             b_isURL = true;
 
-        if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower() == "filename" )
+        if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower().startsWith( "filename" ) == true )
             b_ExportFileExists = true;
 
-        if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower() == "file name" )
-            b_ExportFileExists = true;
-
-        if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower() == "file" )
+        if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower().startsWith( "file name" ) == true )
             b_ExportFileExists = true;
 
         while ( ++i < sl_DatasetIDs.count() )
@@ -336,6 +326,13 @@ void PanGetDialog::getDatasets()
                 sl_Data.append( s_Data );
         }
     }
+
+// **********************************************************************************************
+
+    if ( b_isURL == true )
+        tout << "URL\tfile name\tComment" << endl;
+    else
+        tout << "Comment" << endl;
 
 // **********************************************************************************************
 
