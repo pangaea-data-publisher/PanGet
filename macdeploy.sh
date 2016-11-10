@@ -7,7 +7,7 @@ echo - macdeployqt
 cd ~/Development/GitHub/PanGet
 
 rm -R '../../Distribution/PanGet/PanGet.app'
-cp -R './build-PanGet-Desktop_Qt_5_7_0_clang_64bit2-Release/PanGet.app' '../../Distribution/PanGet/PanGet.app'
+cp -R './build-PanGet-Desktop_Qt_5_7_0_clang_64bit-Release/PanGet.app' '../../Distribution/PanGet/PanGet.app'
 cp './trunk/Resources/Info.plist' '../../Distribution/PanGet/PanGet.app/Contents/Info.plist'
 
 /Developer/Qt/5.7/clang_64/bin/macdeployqt '../../Distribution/PanGet/PanGet.app'
