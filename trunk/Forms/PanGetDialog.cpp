@@ -851,7 +851,7 @@ void PanGetDialog::enableBuildButton()
     else
     {
         GetDatasets_pushButton->setEnabled( false );
-        Cancel_pushButton->setDefault( true );
+        Quit_pushButton->setDefault( true );
     }
 }
 
