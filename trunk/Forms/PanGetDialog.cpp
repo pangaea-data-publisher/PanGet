@@ -159,6 +159,8 @@ void PanGetDialog::getDatasets()
     int err                     = _NOERROR_;
 
     int i       				= 0;
+
+    int i_DatasetID             = 0;
     int i_NumOfQueries          = 0;
     int i_NumOfDatasetIDs       = 0;
 
@@ -187,6 +189,7 @@ void PanGetDialog::getDatasets()
 
     bool	b_ExportFileExists  = false;
     bool	b_isURL             = false;
+    bool    b_isNumeric         = false;
 
 // **********************************************************************************************
 
@@ -220,11 +223,27 @@ void PanGetDialog::getDatasets()
 
     if ( s_Query.isEmpty() == false )
     {
-        s_tempFile = s_DownloadDirectory + "/" + "Query_result_json.txt";
-        s_Url      = "https://www.pangaea.de/advanced/search.php?" + s_Query.section( "/?", 1, 1 );
+        if ( s_Query.toLower().contains( "pangaea.de/?q" ) == true )
+        {
+            s_Url = "https://www.pangaea.de/advanced/search.php?" + s_Query.section( "/?", 1, 1 );
 
-        if ( s_Url.contains( "&count=" ) == false )
-            s_Url.append( "&count=500" );
+            if ( s_Url.contains( "&count=" ) == false )
+                s_Url.append( "&count=500" );
+        }
+        else
+        {
+            if ( s_Query.toLower().startsWith( "dataset" ) == true )
+                i_DatasetID = s_Query.toLower().section( "dataset", 1, 1 ).toInt( &b_isNumeric, 10 );
+            else
+                i_DatasetID = s_Query.toInt( &b_isNumeric, 10 );
+
+            if ( ( b_isNumeric == true ) && ( i_DatasetID > 50000 ) )
+                s_Url = QString ( "https://www.pangaea.de/advanced/search.php?q=dataset%1" ).arg( i_DatasetID );
+            else
+                return;
+        }
+
+        s_tempFile = s_DownloadDirectory + "/" + "Query_result_json.txt";
 
         downloadFile( s_Curl, s_Url, s_tempFile );
 
@@ -792,14 +811,29 @@ void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, 
 
 void PanGetDialog::enableBuildButton()
 {
-    bool b_OK = true;
+    int i_DatasetID  = 0;
+
+    bool b_OK        = true;
+    bool b_isNumeric = false;
 
     QFileInfo fi( IDListFileLineEdit->text() );
 
+// **********************************************************************************************
+
+    if ( QueryLineEdit->text().toLower().startsWith( "dataset" ) == true )
+        i_DatasetID = QueryLineEdit->text().toLower().section( "dataset", 1, 1 ).toInt( &b_isNumeric, 10 );
+    else
+        i_DatasetID = QueryLineEdit->text().toInt( &b_isNumeric, 10 );
+
+// **********************************************************************************************
+
     if ( ( ( fi.isFile() == false ) || ( fi.exists() == false ) ) &&
-         ( QueryLineEdit->text().toLower().startsWith( "https://pangaea.de/?q" ) == false ) &&
-         ( QueryLineEdit->text().toLower().startsWith( "https://www.pangaea.de/?q" ) == false ) )
+         ( QueryLineEdit->text().toLower().startsWith( "https://pangaea.de/?q=" ) == false ) &&
+         ( QueryLineEdit->text().toLower().startsWith( "https://www.pangaea.de/?q=" ) == false ) )
         b_OK = false;
+
+    if ( ( b_isNumeric == true ) && ( i_DatasetID > 50000 ) )
+        b_OK = true;
 
     if ( ( DownloadData_checkBox->isChecked() == false ) && ( DownloadCitation_checkBox->isChecked() == false ) && ( DownloadMetadata_checkBox->isChecked() == false ) )
         b_OK = false;
@@ -817,7 +851,7 @@ void PanGetDialog::enableBuildButton()
     else
     {
         GetDatasets_pushButton->setEnabled( false );
-        GetDatasets_pushButton->setDefault( true );
+        Cancel_pushButton->setDefault( true );
     }
 }
 
