@@ -1105,6 +1105,7 @@ void PanGetDialog::initFileProgress( const int i_NumOfFiles, const QString &s_Fi
 
         FileProgressDialog->setWindowModality( Qt::WindowModal );
         FileProgressDialog->setMinimumDuration( 2 );
+        FileProgressDialog->setMinimumWidth( 300 );
         FileProgressDialog->show();
         FileProgressDialog->setValue( 0 );
 
