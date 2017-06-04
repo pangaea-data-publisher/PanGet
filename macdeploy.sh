@@ -7,10 +7,10 @@ echo - macdeployqt
 cd ~/Development/GitHub/PanGet
 
 rm -R '../../Distribution/PanGet/PanGet.app'
-cp -R './build-PanGet-Desktop_Qt_5_8_0_clang_64bit-Release/PanGet.app' '../../Distribution/PanGet/PanGet.app'
+cp -R './build-PanGet-Desktop_Qt_5_9_0_clang_64bit-Release/PanGet.app' '../../Distribution/PanGet/PanGet.app'
 cp './trunk/Resources/Info.plist' '../../Distribution/PanGet/PanGet.app/Contents/Info.plist'
 
-/Developer/Qt/5.8/clang_64/bin/macdeployqt '../../Distribution/PanGet/PanGet.app'
+/Developer/Qt/5.9/clang_64/bin/macdeployqt '../../Distribution/PanGet/PanGet.app'
 
 echo - code signing
 
