@@ -7,10 +7,10 @@ echo - macdeployqt
 cd ~/Development/GitHub/PanGet
 
 rm -R '../../Distribution/PanGet/PanGet.app'
-cp -R './build-PanGet-Desktop_Qt_5_9_0_clang_64bit-Release/PanGet.app' '../../Distribution/PanGet/PanGet.app'
+cp -R './build-PanGet-Desktop_Qt_5_9_1_clang_64bit-Release/PanGet.app' '../../Distribution/PanGet/PanGet.app'
 cp './trunk/Resources/Info.plist' '../../Distribution/PanGet/PanGet.app/Contents/Info.plist'
 
-/Developer/Qt/5.9/clang_64/bin/macdeployqt '../../Distribution/PanGet/PanGet.app'
+/Developer/Qt/5.9.1/clang_64/bin/macdeployqt '../../Distribution/PanGet/PanGet.app'
 
 echo - code signing
 
@@ -18,6 +18,7 @@ codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Insti
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/Frameworks/QtGui.framework'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/Frameworks/QtNetwork.framework'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/Frameworks/QtPrintSupport.framework'
+codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/Frameworks/QtSvg.framework'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/Frameworks/QtWidgets.framework'
 
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/bearer/libqcorewlanbearer.dylib'
@@ -33,6 +34,7 @@ codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Insti
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/imageformats/libqwebp.dylib'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/platforms/libqcocoa.dylib'
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/printsupport/libcocoaprintersupport.dylib'
+codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app/Contents/PlugIns/iconengines/libqsvgicon.dylib'
 
 codesign --force --verify --sign 'Developer ID Application: Alfred-Wegener-Institut fur Polar- und Meeresforschung (AWI)' '../../Distribution/PanGet/PanGet.app'
 
