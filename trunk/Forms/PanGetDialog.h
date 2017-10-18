@@ -47,6 +47,8 @@ private:
     int removeFile( const QString &Filename );
     int readFile( const QString &FilenameIn, QStringList &Input, const int Codec = -1, const qint64 i_Bytes = 0 );
     int downloadFile( const QString &Curl, const QString &Url, const QString &Filename );
+    int downloadFile( const QString &Curl, const QString &arg );
+
     int checkFile( const QString &Filename, const bool isbinary );
 
     void loadPreferences( int &NumOfProgramStarts, int &Dialog_X, int &Dialog_Y, int &Dialog_Width, QString &User, QString &Password, QString &Query, QString &IDListFile, QString &DownloadDirectory, bool &DownloadData, bool &DownloadCitation, bool &DownloadMetadata, int &CodecDownload, int &i_Extension );

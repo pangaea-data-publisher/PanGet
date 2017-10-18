@@ -186,6 +186,7 @@ void PanGetDialog::getDatasets()
     QString s_Url				= "";
     QString s_Curl              = "";
     QString s_tempFile          = "";
+    QString s_CookieFile        = "";
 
     QString s_PathDir           = "";
     QString s_PathFile          = "";
@@ -195,7 +196,7 @@ void PanGetDialog::getDatasets()
     QStringList sl_Data;
 
     bool	b_ExportFileExists  = false;
-    bool	b_isURL             = false;
+    bool	b_UrlExternal             = false;
     bool    b_isNumeric         = false;
 
 // **********************************************************************************************
@@ -335,10 +336,10 @@ void PanGetDialog::getDatasets()
         sl_DatasetIDs.removeDuplicates();
 
         if ( sl_DatasetIDs.at( 0 ).section( "\t", 0, 0 ).toLower().startsWith( "url" ) == true )
-            b_isURL = true;
+            b_UrlExternal = true;
 
         if ( sl_DatasetIDs.at( 0 ).section( "\t", 0, 0 ).toLower().startsWith( "uniform resource locator" ) == true )
-            b_isURL = true;
+            b_UrlExternal = true;
 
         if ( sl_DatasetIDs.at( 0 ).section( "\t", 1, 1 ).toLower().startsWith( "filename" ) == true )
             b_ExportFileExists = true;
@@ -358,7 +359,7 @@ void PanGetDialog::getDatasets()
 
 // **********************************************************************************************
 
-    if ( b_isURL == true )
+    if ( b_UrlExternal == true )
         tout << "URL\tfile name\tComment" << endl;
     else
         tout << "Comment" << endl;
@@ -381,19 +382,16 @@ void PanGetDialog::getDatasets()
 
     i = 0;
 
-    if ( ( b_DownloadData == true ) && ( b_isURL == false ) && ( s_User.isEmpty() == false) && ( s_Password.isEmpty() == false ) )
+    if ( ( b_DownloadData == true ) && ( b_UrlExternal == false ) && ( s_User.isEmpty() == false) && ( s_Password.isEmpty() == false ) )
     {
-        QProcess process;
+        s_CookieFile = QDir::toNativeSeparators( s_DownloadDirectory ) + "/cookies";
 
-        removeFile( s_DownloadDirectory + "/cookies" );
-
-        process.start( "\"" + QDir::toNativeSeparators( s_Curl ) + "\" -d \"user=" + s_User + "&password=" + s_Password + "\" -c " + s_DownloadDirectory + "/cookies https://www.pangaea.de/user/login.php" );
-        process.waitForFinished( -1 );
+        downloadFile( s_Curl, "-d \"user=" + s_User + "&" + "password=" + s_Password + "\" " + "-c \"" + s_CookieFile + "\" " + "https://www.pangaea.de/user/login.php" );
     }
 
     while ( ( i < i_totalNumOfDownloads ) && ( err == _NOERROR_ ) && ( i_stopProgress != _APPBREAK_ ) )
     {
-        if ( b_isURL == true )
+        if ( b_UrlExternal == true )
         {
             s_Domain = sl_Data.at( i ).section( "\t", 0, 0 ).section( "/", 0, 2 ); // eg. http://iodp.tamu.edu/
 
@@ -421,13 +419,13 @@ void PanGetDialog::getDatasets()
 
             if ( s_Filename.isEmpty() == true )
             {
-                if ( b_isURL == true )
+                if ( b_UrlExternal == true )
                     s_Filename = sl_Data.at( i ).section( "\t", 0, 0 ).section( "/", -1, -1 );
                 else
                     s_Filename = tr( "not_given" );
             }
 
-            if ( b_isURL == false )
+            if ( b_UrlExternal == false )
             {
                 s_Filename.append( tr( "~" ) );
                 s_Filename.append( s_DatasetID );
@@ -435,13 +433,13 @@ void PanGetDialog::getDatasets()
         }
         else
         {
-            if ( b_isURL == true )
+            if ( b_UrlExternal == true )
                 s_Filename = sl_Data.at( i ).section( "\t", 0, 0 ).section( "/", -1, -1 );
             else
                 s_Filename.sprintf( "%06d", s_DatasetID.toInt() );
         }
 
-        if ( ( b_DownloadCitation == true ) && ( b_isURL == false ) )
+        if ( ( b_DownloadCitation == true ) && ( b_UrlExternal == false ) )
         {
             s_Url = s_Domain + "/10.1594/PANGAEA."+ s_DatasetID + "?format=citation_text";
 
@@ -453,7 +451,7 @@ void PanGetDialog::getDatasets()
             wait( 100 );
         }
 
-        if ( ( b_DownloadMetadata == true ) && ( b_isURL == false ) )
+        if ( ( b_DownloadMetadata == true ) && ( b_UrlExternal == false ) )
         {
             s_Url = s_Domain + "/10.1594/PANGAEA."+ s_DatasetID + "?format=metainfo_xml";
 
@@ -467,11 +465,11 @@ void PanGetDialog::getDatasets()
 
         if ( b_DownloadData == true )
         {
-            if ( ( b_isURL == true ) || ( s_DatasetID.toInt() >= 50000 ) )
+            if ( ( b_UrlExternal == true ) || ( s_DatasetID.toInt() >= 50000 ) )
             {
                 s_Filename = s_DownloadDirectory + "/" + s_Filename;
 
-                if ( b_isURL == false )
+                if ( b_UrlExternal == false )
                 {
                     // download PANGAEA data sets
 
@@ -493,11 +491,10 @@ void PanGetDialog::getDatasets()
                         break;
                     }
 
-                    downloadFile( s_Curl, s_Url, s_Filename );
-
-//                    curl -s -o 881889.txt -b cookies "https://doi.pangaea.de/10.1594/PANGAEA.881889?format=textfile&charset=utf-8"
-//                    curl -s -o 881892.txt -b cookies "https://doi.pangaea.de/10.1594/PANGAEA.881892?format=textfile&charset=utf-8"
-//                    curl -s -o 881893.txt -b cookies "https://doi.pangaea.de/10.1594/PANGAEA.881893?format=textfile&charset=utf-8"
+                    if ( ( s_User.isEmpty() == false ) && ( s_Password.isEmpty() == false ) )
+                        downloadFile( s_Curl, "-s -o \"" + s_Filename + "\" " + "-b \"" + s_CookieFile + "\" " + s_Url );
+                    else
+                        downloadFile( s_Curl, s_Url, s_Filename );
 
                     switch( checkFile( s_Filename, false ) )
                     {
@@ -573,7 +570,12 @@ void PanGetDialog::getDatasets()
 
 // **********************************************************************************************
 
-    if ( b_isURL == false )
+    if ( ( b_DownloadData == true ) && ( b_UrlExternal == false ) && ( s_User.isEmpty() == false) && ( s_Password.isEmpty() == false ) )
+        removeFile( s_CookieFile );
+
+// **********************************************************************************************
+
+    if ( b_UrlExternal == false )
     {
         if ( i-i_removedDatasets == 0 )
         {
@@ -992,6 +994,27 @@ int PanGetDialog::downloadFile( const QString &s_Curl, const QString &s_Url, con
     removeFile( s_Filename );
 
     process.start( "\"" + QDir::toNativeSeparators( s_Curl ) + "\" -o \"" + QDir::toNativeSeparators( s_Filename ) + "\" \"" + s_Url + "\"" );
+    process.waitForFinished( -1 );
+
+    return( _NOERROR_ );
+}
+
+// **********************************************************************************************
+// **********************************************************************************************
+// **********************************************************************************************
+// 2017-10-18
+
+/*! @brief Download einer Datei mit Curl von einem beliebigen Webserver. Ablage in eine lokale Datei.
+*
+*   @param s_Curl, Pfad zum Programm curl wird mit findCurl() ermittelt
+*   @param s_arg, Argumente
+*/
+
+int PanGetDialog::downloadFile( const QString &s_Curl, const QString &s_arg )
+{
+    QProcess process;
+
+    process.start( "\"" + QDir::toNativeSeparators( s_Curl ) + "\" " + s_arg );
     process.waitForFinished( -1 );
 
     return( _NOERROR_ );
