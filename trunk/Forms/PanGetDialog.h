@@ -49,8 +49,8 @@ private:
     int downloadFile( const QString &Curl, const QString &Url, const QString &Filename );
     int checkFile( const QString &Filename, const bool isbinary );
 
-    void loadPreferences( int &NumOfProgramStarts, int &Dialog_X, int &Dialog_Y, int &Dialog_Width, QString &Query, QString &IDListFile, QString &DownloadDirectory, bool &DownloadData, bool &DownloadCitation, bool &DownloadMetadata, int &CodecDownload, int &i_Extension );
-    void savePreferences( const int NumOfProgramStarts, const int Dialog_X, const int Dialog_Y, const int Dialog_Width, const QString &Query, const QString &IDListFile, const QString &DownloadDirectory, const bool DownloadData, const bool DownloadCitation, const bool DownloadMetadata, const int CodecDownload, const int Extension );
+    void loadPreferences( int &NumOfProgramStarts, int &Dialog_X, int &Dialog_Y, int &Dialog_Width, QString &User, QString &Password, QString &Query, QString &IDListFile, QString &DownloadDirectory, bool &DownloadData, bool &DownloadCitation, bool &DownloadMetadata, int &CodecDownload, int &i_Extension );
+    void savePreferences( const int NumOfProgramStarts, const int Dialog_X, const int Dialog_Y, const int Dialog_Width, const QString &User, const QString &Password, const QString &Query, const QString &IDListFile, const QString &DownloadDirectory, const bool DownloadData, const bool DownloadCitation, const bool DownloadMetadata, const int CodecDownload, const int Extension );
 
     void initFileProgress( const int NumOfFiles, const QString &FilenameIn, const QString &MessageText );
     int incFileProgress( const int NumOfFiles, const int FileNumber );

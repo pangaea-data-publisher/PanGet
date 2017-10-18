@@ -18,7 +18,7 @@ int main( int argc, char ** argv )
 
     PanGetDialog dialog;
 
-    dialog.setWindowTitle( "PanGet - V4.0" );
+    dialog.setWindowTitle( "PanGet - V4.1" );
     dialog.setSizeGripEnabled( true );
     dialog.setAcceptDrops( true );
 

@@ -30,10 +30,12 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
 
     int		i_minWidth			 = 8*fontMetrics().width( 'w' ) + 2;
 
-    QString s_Version            = "PanGet V4.0";
+    QString s_Version            = "PanGet V4.1";
     QString s_Query              = "";
     QString s_IDListFile		 = "";
     QString s_DownloadDirectory	 = "";
+    QString s_User               = "";
+    QString s_Password           = "";
 
     bool    b_DownloadData       = true;
     bool    b_DownloadCitation   = false;
@@ -76,13 +78,13 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
 // **********************************************************************************************
 // load preferences
 
-    loadPreferences( gi_NumOfProgramStarts, i_Dialog_X, i_Dialog_Y, i_Dialog_Width, s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_Extension );
+    loadPreferences( gi_NumOfProgramStarts, i_Dialog_X, i_Dialog_Y, i_Dialog_Width, s_User, s_Password, s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_Extension );
 
     this->move( i_Dialog_X, i_Dialog_Y );
     this->resize( i_Dialog_Width, 250 );
 
     if ( gi_NumOfProgramStarts++ < 1 )
-        savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_Extension );
+        savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_User, s_Password, s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_Extension );
 
 // **********************************************************************************************
 // set Codec
@@ -92,7 +94,7 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
 // **********************************************************************************************
 // set PANGAEA Query
 
-    if ( s_Query.toLower().startsWith( "https://pangaea.de/?q" ) == true )
+    if ( ( s_Query.toLower().startsWith( "https://pangaea.de/?" ) == true ) || ( s_Query.toLower().startsWith( "https://www.pangaea.de/?" ) == true ) || ( s_Query.toLower().startsWith( "dataset" ) == true ) )
         QueryLineEdit->setText( s_Query );
 
 // **********************************************************************************************
@@ -139,6 +141,11 @@ PanGetDialog::PanGetDialog( QWidget *parent ) : QDialog( parent )
     DownloadData_checkBox->setChecked( b_DownloadData );
     DownloadCitation_checkBox->setChecked( b_DownloadCitation );
     DownloadMetadata_checkBox->setChecked( b_DownloadMetadata );
+
+// **********************************************************************************************
+
+    UserLineEdit->setText( s_User );
+    PasswordLineEdit->setText( s_Password );
 
 // **********************************************************************************************
 
@@ -204,6 +211,9 @@ void PanGetDialog::getDatasets()
     QString s_Query             = QueryLineEdit->text();
     QString s_IDListFile		= IDListFileLineEdit->text();
 
+    QString s_User              = UserLineEdit->text();
+    QString s_Password          = PasswordLineEdit->text();
+
 // **********************************************************************************************
 
     if ( s_DownloadDirectory.endsWith( QDir::toNativeSeparators( "/" ) ) == true )
@@ -214,7 +224,7 @@ void PanGetDialog::getDatasets()
 
 // **********************************************************************************************
 
-    savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_Extension );
+    savePreferences( gi_NumOfProgramStarts, pos().x(), pos().y(), width(), s_User, s_Password, s_Query, s_IDListFile, s_DownloadDirectory, b_DownloadData, b_DownloadCitation, b_DownloadMetadata, i_CodecDownload, i_Extension );
 
 // **********************************************************************************************
 // read ID list
@@ -371,6 +381,16 @@ void PanGetDialog::getDatasets()
 
     i = 0;
 
+    if ( ( b_DownloadData == true ) && ( b_isURL == false ) && ( s_User.isEmpty() == false) && ( s_Password.isEmpty() == false ) )
+    {
+        QProcess process;
+
+        removeFile( s_DownloadDirectory + "/cookies" );
+
+        process.start( "\"" + QDir::toNativeSeparators( s_Curl ) + "\" -d \"user=" + s_User + "&password=" + s_Password + "\" -c " + s_DownloadDirectory + "/cookies https://www.pangaea.de/user/login.php" );
+        process.waitForFinished( -1 );
+    }
+
     while ( ( i < i_totalNumOfDownloads ) && ( err == _NOERROR_ ) && ( i_stopProgress != _APPBREAK_ ) )
     {
         if ( b_isURL == true )
@@ -474,6 +494,10 @@ void PanGetDialog::getDatasets()
                     }
 
                     downloadFile( s_Curl, s_Url, s_Filename );
+
+//                    curl -s -o 881889.txt -b cookies "https://doi.pangaea.de/10.1594/PANGAEA.881889?format=textfile&charset=utf-8"
+//                    curl -s -o 881892.txt -b cookies "https://doi.pangaea.de/10.1594/PANGAEA.881892?format=textfile&charset=utf-8"
+//                    curl -s -o 881893.txt -b cookies "https://doi.pangaea.de/10.1594/PANGAEA.881893?format=textfile&charset=utf-8"
 
                     switch( checkFile( s_Filename, false ) )
                     {
@@ -736,7 +760,7 @@ QString PanGetDialog::getPreferenceFilename()
 // **********************************************************************************************
 // 2016-10-04
 
-void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_Dialog_X, const int i_Dialog_Y, const int i_Dialog_Width, const QString &s_Query, const QString &s_IDListFile, const QString &s_DownloadDirectory, const bool b_DownloadData, const bool b_DownloadCitation, const bool b_DownloadMetadata, const int i_CodecDownload, const int i_Extension )
+void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_Dialog_X, const int i_Dialog_Y, const int i_Dialog_Width, const QString &s_User, const QString &s_Password, const QString &s_Query, const QString &s_IDListFile, const QString &s_DownloadDirectory, const bool b_DownloadData, const bool b_DownloadCitation, const bool b_DownloadMetadata, const int i_CodecDownload, const int i_Extension )
 {
     #if defined(Q_OS_LINUX)
         QSettings settings( getPreferenceFilename(), QSettings::IniFormat );
@@ -757,6 +781,8 @@ void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_
     settings.setValue( "DialogY", i_Dialog_Y );
     settings.setValue( "DialogWidth", i_Dialog_Width );
 
+    settings.setValue( "User", s_User );
+    settings.setValue( "Password", s_Password );
     settings.setValue( "Query", s_Query );
     settings.setValue( "IDListFile", s_IDListFile );
     settings.setValue( "DownloadDirectory", s_DownloadDirectory );
@@ -773,7 +799,7 @@ void PanGetDialog::savePreferences( const int i_NumOfProgramStarts, const int i_
 // **********************************************************************************************
 // 2016-10-04
 
-void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, int &i_Dialog_Y, int &i_Dialog_Width, QString &s_Query, QString &s_IDListFile, QString &s_DownloadDirectory, bool &b_DownloadData, bool &b_DownloadCitation, bool &b_DownloadMetadata, int &i_CodecDownload, int &i_Extension )
+void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, int &i_Dialog_Y, int &i_Dialog_Width, QString &s_User, QString &s_Password, QString &s_Query, QString &s_IDListFile, QString &s_DownloadDirectory, bool &b_DownloadData, bool &b_DownloadCitation, bool &b_DownloadMetadata, int &i_CodecDownload, int &i_Extension )
 {
     #if defined(Q_OS_LINUX)
         QSettings settings( getPreferenceFilename(), QSettings::IniFormat );
@@ -794,6 +820,8 @@ void PanGetDialog::loadPreferences( int &i_NumOfProgramStarts, int &i_Dialog_X, 
     i_Dialog_Y          = settings.value( "DialogY", 100 ).toInt();
     i_Dialog_Width      = settings.value( "DialogWidth", 600 ).toInt();
 
+    s_User              = settings.value( "User", "" ).toString();
+    s_Password          = settings.value( "Password", "" ).toString();
     s_Query             = settings.value( "Query", "" ).toString();
     s_IDListFile        = settings.value( "IDListFile", "" ).toString();
     s_DownloadDirectory = settings.value( "DownloadDirectory", "" ).toString();
@@ -842,7 +870,7 @@ void PanGetDialog::enableBuildButton()
 // **********************************************************************************************
 // Query
 
-    if ( ( QueryLineEdit->text().toLower().startsWith( "https://pangaea.de/" ) == false ) || ( QueryLineEdit->text().toLower().contains( "?q=" ) == false ) )
+    if ( ( ( QueryLineEdit->text().toLower().startsWith( "https://pangaea.de/" ) == false ) && ( QueryLineEdit->text().toLower().startsWith( "https://www.pangaea.de/" ) == false ) ) || ( QueryLineEdit->text().toLower().contains( "?q=" ) == false ) )
         b_OK_Query = false;
 
 // **********************************************************************************************
@@ -1067,6 +1095,8 @@ void PanGetDialog::browseDownloadDirectoryDialog()
 
 void PanGetDialog::clear()
 {
+    UserLineEdit->clear();
+    PasswordLineEdit->clear();
     QueryLineEdit->clear();
     IDListFileLineEdit->clear();
     DownloadDirectoryLineEdit->clear();
